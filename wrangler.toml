@@ -2,11 +2,11 @@ name = "granit-docs-mcp"
 main = "src/index.ts"
 compatibility_date = "2025-05-01"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
 
-# Custom domain — configure via Cloudflare Dashboard > Workers > Triggers > Custom Domains
-# Target: mcp.granit-fx.dev
-# The domain must be proxied through Cloudflare (orange-cloud) on the granit-fx.dev zone.
-# Workers custom domains are preferred over routes for cleaner configuration.
+[[routes]]
+pattern = "mcp.granit-fx.dev/*"
+zone_id = "4981ce82f44db627f54c9f834fd77b69"
 
 [vars]
 SEARCH_INDEX_URL = "https://granit-fx.dev/search-index.json"
@@ -14,10 +14,7 @@ SEARCH_INDEX_URL = "https://granit-fx.dev/search-index.json"
 [observability]
 enabled = true
 
-# Replace PLACEHOLDER IDs after running:
-#   npx wrangler kv namespace create DOCS_CACHE
-#   npx wrangler kv namespace create DOCS_CACHE --preview
 [[kv_namespaces]]
 binding = "DOCS_CACHE"
-id = "PLACEHOLDER_KV_ID"
-preview_id = "PLACEHOLDER_KV_PREVIEW_ID"
+id = "79e20769d82c43698071067e85462d36"
+preview_id = "8be0e4d7eb6143e084e717f43ba7aa36"
