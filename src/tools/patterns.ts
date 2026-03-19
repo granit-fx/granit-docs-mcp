@@ -1,9 +1,9 @@
-import type { DocsCache } from '../lib/index-cache.js';
+import type { KVCache } from '../lib/index-cache.js';
 import { getSearchIndex } from '../lib/index-cache.js';
 
 const DOCS_BASE = 'https://granit-fx.dev';
 
-export async function handleListPatterns(indexUrl: string, cache: DocsCache): Promise<string> {
+export async function handleListPatterns(indexUrl: string, cache: KVCache): Promise<string> {
   const entries = await getSearchIndex(indexUrl, cache);
   const patterns = entries.filter((e) => e.category === 'pattern');
 

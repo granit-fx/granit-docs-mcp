@@ -1,12 +1,23 @@
 /**
- * Fetches and caches the structured search index from CF Pages.
+ * Generic index fetcher with KV caching.
  *
- * The index is generated at docs build time and served as a static JSON file.
- * Cached in CF KV for 24 hours.
+ * Supports multiple indexes (docs, code, front) via prefixed cache keys
+ * and configurable TTLs. Each index is fetched from a static URL and
+ * cached in Cloudflare KV.
  */
 
-const CACHE_KEY = 'search-index';
-const CACHE_TTL_SECONDS = 86_400; // 24 h
+// ─── TTLs per index type ──────────────────────────────────────────────────────
+
+const TTL = {
+  docs: 86_400,   // 24 h — docs change infrequently
+  code: 43_200,   // 12 h — code changes on develop merges
+  front: 43_200,  // 12 h
+  nuget: 43_200,  // 12 h — package list
+} as const;
+
+export type IndexKind = keyof typeof TTL;
+
+// ─── Docs index entry (search-index.json) ─────────────────────────────────────
 
 export interface IndexEntry {
   title: string;
@@ -17,21 +28,40 @@ export interface IndexEntry {
   content: string;
 }
 
-export interface DocsCache {
+// ─── KV abstraction ───────────────────────────────────────────────────────────
+
+export interface KVCache {
   get(key: string): Promise<string | null>;
   put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
 }
 
-export async function getSearchIndex(indexUrl: string, cache: DocsCache): Promise<IndexEntry[]> {
-  const cached = await cache.get(CACHE_KEY);
-  if (cached) return JSON.parse(cached) as IndexEntry[];
+// ─── Generic index fetcher ────────────────────────────────────────────────────
 
-  const response = await fetch(indexUrl);
+/**
+ * Fetches a JSON index from a URL, caching it in KV with a prefixed key.
+ *
+ * @param kind   - Index type (determines cache key prefix and TTL)
+ * @param url    - URL to fetch the index from on cache miss
+ * @param cache  - KV namespace
+ */
+export async function getIndex<T>(kind: IndexKind, url: string, cache: KVCache): Promise<T> {
+  const cacheKey = `${kind}:index`;
+
+  const cached = await cache.get(cacheKey);
+  if (cached) return JSON.parse(cached) as T;
+
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Failed to fetch search-index.json: ${response.status} ${response.statusText}`);
+    throw new Error(`Failed to fetch ${kind} index from ${url}: ${response.status} ${response.statusText}`);
   }
 
   const text = await response.text();
-  await cache.put(CACHE_KEY, text, { expirationTtl: CACHE_TTL_SECONDS });
-  return JSON.parse(text) as IndexEntry[];
+  await cache.put(cacheKey, text, { expirationTtl: TTL[kind] });
+  return JSON.parse(text) as T;
+}
+
+// ─── Convenience: docs search index ───────────────────────────────────────────
+
+export async function getSearchIndex(indexUrl: string, cache: KVCache): Promise<IndexEntry[]> {
+  return getIndex<IndexEntry[]>('docs', indexUrl, cache);
 }

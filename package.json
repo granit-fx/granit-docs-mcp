@@ -1,8 +1,8 @@
 {
-  "name": "granit-docs-mcp",
-  "version": "1.0.0",
+  "name": "granit-mcp",
+  "version": "2.0.0",
   "private": true,
-  "description": "MCP server for Granit documentation — Pagefind full-text search over Cloudflare Workers",
+  "description": "MCP server for Granit framework — documentation, code navigation, and NuGet packages over Cloudflare Workers",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {

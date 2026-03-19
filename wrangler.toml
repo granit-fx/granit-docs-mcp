@@ -1,4 +1,4 @@
-name = "granit-docs-mcp"
+name = "granit-mcp"
 main = "src/index.ts"
 compatibility_date = "2025-05-01"
 compatibility_flags = ["nodejs_compat"]
@@ -10,11 +10,13 @@ zone_id = "4981ce82f44db627f54c9f834fd77b69"
 
 [vars]
 SEARCH_INDEX_URL = "https://granit-fx.dev/search-index.json"
+CODE_INDEX_URL   = "https://github.com/granit-fx/granit-dotnet/releases/latest/download/code-index.json"
+FRONT_INDEX_URL  = "https://github.com/granit-fx/granit-front/releases/latest/download/front-index.json"
 
 [observability]
 enabled = true
 
 [[kv_namespaces]]
-binding = "DOCS_CACHE"
+binding = "CACHE"
 id = "79e20769d82c43698071067e85462d36"
 preview_id = "8be0e4d7eb6143e084e717f43ba7aa36"

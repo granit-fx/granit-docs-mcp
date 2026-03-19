@@ -1,4 +1,4 @@
-import type { DocsCache } from '../lib/index-cache.js';
+import type { KVCache } from '../lib/index-cache.js';
 import { getSearchIndex } from '../lib/index-cache.js';
 import { searchIndex } from '../lib/search.js';
 
@@ -7,7 +7,7 @@ export interface SearchInput {
   limit: number;
 }
 
-export async function handleSearch(input: SearchInput, indexUrl: string, cache: DocsCache): Promise<string> {
+export async function handleSearch(input: SearchInput, indexUrl: string, cache: KVCache): Promise<string> {
   const entries = await getSearchIndex(indexUrl, cache);
   const results = searchIndex(entries, input.query, input.limit);
 
