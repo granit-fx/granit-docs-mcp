@@ -47,16 +47,36 @@ export interface KVCache {
 export async function getIndex<T>(kind: IndexKind, url: string, cache: KVCache): Promise<T> {
   const cacheKey = `${kind}:index`;
 
+  // 1. Try KV cache first
   const cached = await cache.get(cacheKey);
   if (cached) return JSON.parse(cached) as T;
 
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${kind} index from ${url}: ${response.status} ${response.statusText}`);
+  // 2. Fetch from origin
+  let text: string;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    text = await response.text();
+  } catch (err) {
+    // Fail-open: if fetch fails and we have a stale cache entry, use it.
+    // KV .get() above only returns non-expired entries, so check with a
+    // separate stale key that has a much longer TTL.
+    const stale = await cache.get(`${cacheKey}:stale`);
+    if (stale) {
+      console.warn(`[granit-mcp] ${kind} index fetch failed, serving stale cache: ${err}`);
+      return JSON.parse(stale) as T;
+    }
+    throw new Error(`Failed to fetch ${kind} index from ${url}: ${err}`);
   }
 
-  const text = await response.text();
-  await cache.put(cacheKey, text, { expirationTtl: TTL[kind] });
+  // 3. Cache fresh copy + long-lived stale fallback (7 days)
+  await Promise.all([
+    cache.put(cacheKey, text, { expirationTtl: TTL[kind] }),
+    cache.put(`${cacheKey}:stale`, text, { expirationTtl: 604_800 }),
+  ]);
+
   return JSON.parse(text) as T;
 }
 
