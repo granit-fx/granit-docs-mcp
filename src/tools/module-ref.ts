@@ -1,4 +1,4 @@
-import type { DocsCache, IndexEntry } from '../lib/index-cache.js';
+import type { KVCache, IndexEntry } from '../lib/index-cache.js';
 import { getSearchIndex } from '../lib/index-cache.js';
 
 export interface ModuleRefInput {
@@ -7,7 +7,7 @@ export interface ModuleRefInput {
 
 const DOCS_BASE = 'https://granit-fx.dev';
 
-export async function handleModuleRef(input: ModuleRefInput, indexUrl: string, cache: DocsCache): Promise<string> {
+export async function handleModuleRef(input: ModuleRefInput, indexUrl: string, cache: KVCache): Promise<string> {
   const entries = await getSearchIndex(indexUrl, cache);
   const match = findModule(entries, input.module);
 

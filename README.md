@@ -1,27 +1,50 @@
-# granit-docs-mcp
+# granit-mcp
 
-Remote MCP server for [Granit](https://granit-fx.dev) documentation. Allows AI
-assistants (Claude Code, Cursor, Windsurf, etc.) to search the framework docs in
-real time via the Model Context Protocol.
+Remote MCP server for the [Granit framework](https://granit-fx.dev) — gives AI
+assistants (Claude Code, Cursor, Windsurf) structured access to documentation,
+code navigation, and NuGet package metadata.
 
-Powered by a **pre-built JSON search index** running on **Cloudflare Workers**.
+Powered by a **pre-built JSON search index** and the **NuGet public API**, running
+on **Cloudflare Workers** with [Hono](https://hono.dev/) and the
+[Model Context Protocol SDK](https://modelcontextprotocol.io/).
 
 ## Tools
 
+### Documentation
+
 | Tool | Description |
 | ---- | ----------- |
-| `search_granit_docs` | Full-text search across the entire documentation |
-| `get_module_reference` | Retrieve the complete reference for a specific module |
-| `list_patterns` | List all architecture patterns with descriptions |
+| `search_granit_docs` | Full-text TF-IDF search across docs |
+| `get_module_reference` | Complete reference for a module |
+| `list_patterns` | Architecture patterns by platform |
+
+### NuGet packages
+
+| Tool | Description |
+| ---- | ----------- |
+| `list_packages` | Granit.\* packages with version/downloads |
+| `get_package_info` | Versions, deps, frameworks, license |
+
+### Code navigation (coming soon)
+
+| Tool | Description |
+| ---- | ----------- |
+| `search_code` | Search symbols across .NET and TS |
+| `get_public_api` | Public API of a type with signatures |
+| `get_project_graph` | Project/package dependency graph |
 
 ## Use with Claude Code
 
-Add this to your project's `.mcp.json`:
+```bash
+claude mcp add granit-mcp --transport http https://mcp.granit-fx.dev/mcp
+```
+
+Or add to your project's `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
-    "granit-docs": {
+    "granit-mcp": {
       "type": "url",
       "url": "https://mcp.granit-fx.dev/mcp"
     }
@@ -29,11 +52,11 @@ Add this to your project's `.mcp.json`:
 }
 ```
 
-## Use with Cursor
+## Use with Cursor / Windsurf
 
 Add the MCP server in **Settings > MCP Servers**:
 
-- **Name:** `granit-docs`
+- **Name:** `granit-mcp`
 - **Type:** `http`
 - **URL:** `https://mcp.granit-fx.dev/mcp`
 
@@ -50,11 +73,8 @@ node scripts/generate-search-index.mjs
 # Serve the built docs locally (includes search-index.json)
 python3 -m http.server 4322 -d dist &
 
-# Create .dev.vars to point to local docs
-cd ../../granit-docs-mcp
-echo 'SEARCH_INDEX_URL=http://localhost:4322/search-index.json' > .dev.vars
-
 # Start local Worker
+cd ../../granit-docs-mcp
 pnpm dev
 ```
 
@@ -67,21 +87,30 @@ npx @modelcontextprotocol/inspector http://localhost:8787/mcp
 ## Architecture
 
 ```text
-Claude Code / Cursor
-  └── MCP Streamable HTTP
-        └── Cloudflare Worker (granit-docs-mcp)
-              ├── search_granit_docs ─────┐
-              ├── get_module_reference ───┤── fetch granit-fx.dev/search-index.json
-              └── list_patterns ──────────┘   (KV cache 24 h)
+AI Assistant
+  |  MCP Streamable HTTP
+  v
+Cloudflare Worker (mcp.granit-fx.dev)
+  |
+  +-- Docs tools -----> search-index.json (CF Pages, 24h KV cache)
+  +-- Code tools -----> code-index.json   (GitHub Release, 12h KV cache)
+  |                     front-index.json  (GitHub Release, 12h KV cache)
+  +-- NuGet tools ----> api.nuget.org     (public, 6-12h KV cache)
 ```
 
-- A `search-index.json` is generated at docs build time by
-  `docs-site/scripts/generate-search-index.mjs` in the `granit-dotnet` repo
-- Each entry has: title, description, URL, category, platform, content
-- The Worker fetches the index from CF Pages and caches it in KV for 24 hours
-- Search uses TF-IDF scoring with weighted fields (title 5x, description 3x)
-- Module reference matches by URL slug, title, or fuzzy partial
-- Auto-updated: each docs deploy produces a fresh index; KV TTL handles cache
+Complementary with the
+[GitHub MCP Server](https://github.com/github/github-mcp-server) for file
+browsing, commits, PRs, and issues.
+
+### Data sources
+
+| Source | Origin | Cache TTL |
+| ------ | ------ | --------- |
+| `search-index.json` | CF Pages (granit-fx.dev) | 24 h |
+| `code-index.json` | GitHub Release (granit-dotnet) | 12 h |
+| `front-index.json` | GitHub Release (granit-front) | 12 h |
+| NuGet package list | NuGet Search API | 12 h |
+| NuGet package info | NuGet Registration API | 6 h |
 
 ### Search index categories
 
@@ -107,6 +136,13 @@ deploy (`repository_dispatch: docs-deployed`).
 | ------ | ------- |
 | `CLOUDFLARE_API_TOKEN` | Wrangler deploy to Cloudflare Workers |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account identifier |
+
+## ADRs
+
+- [ADR-001](docs/adr/001-json-index-cloudflare-workers.md) —
+  JSON index + Cloudflare Workers
+- [ADR-002](docs/adr/002-granit-mcp-code-and-packages.md) —
+  Code navigation & NuGet packages
 
 ## License
 

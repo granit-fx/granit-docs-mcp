@@ -3,14 +3,16 @@ import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/
 import { createMcpServer } from './mcp/server.js';
 
 export interface Env {
-  DOCS_CACHE: KVNamespace;
+  CACHE: KVNamespace;
   SEARCH_INDEX_URL: string;
+  CODE_INDEX_URL: string;
+  FRONT_INDEX_URL: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();
 
 // Health check
-app.get('/', (c) => c.json({ name: 'granit-docs-mcp', version: '1.0.0', status: 'ok' }));
+app.get('/', (c) => c.json({ name: 'granit-mcp', version: '2.0.0', status: 'ok' }));
 
 // MCP endpoint — Streamable HTTP transport (stateless: one transport per request)
 app.all('/mcp', async (c) => {
