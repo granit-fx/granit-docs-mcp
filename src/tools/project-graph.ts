@@ -17,9 +17,8 @@ export async function handleProjectGraph(
     const codeIndex = await getCodeIndex(codeIndexUrl, cache);
     if (codeIndex && codeIndex.projectGraph.length > 0) {
       const projects = codeIndex.projectGraph;
-      const lines = projects
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((p) => {
+      const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name));
+      const lines = sorted.map((p) => {
           const deps = p.deps.length > 0
             ? `→ ${p.deps.join(', ')}`
             : '*(no dependencies)*';
@@ -37,9 +36,8 @@ export async function handleProjectGraph(
     const frontIndex = await getFrontIndex(frontIndexUrl, cache);
     if (frontIndex && frontIndex.packages.length > 0) {
       const pkgs = frontIndex.packages;
-      const lines = pkgs
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((p) => {
+      const sorted = [...pkgs].sort((a, b) => a.name.localeCompare(b.name));
+      const lines = sorted.map((p) => {
           const desc = p.description ? ` — ${p.description}` : '';
           return `- **${p.name}**${desc}`;
         });

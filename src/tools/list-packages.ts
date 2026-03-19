@@ -8,8 +8,8 @@ export async function handleListPackages(cache: KVCache): Promise<string> {
     return 'No Granit packages found on NuGet.';
   }
 
-  const rows = packages
-    .sort((a, b) => a.id.localeCompare(b.id))
+  const sorted = [...packages].sort((a, b) => a.id.localeCompare(b.id));
+  const rows = sorted
     .map((pkg) => {
       const dl = pkg.downloads >= 1000 ? `${(pkg.downloads / 1000).toFixed(1)}k` : String(pkg.downloads);
       return `- **${pkg.id}** v${pkg.version} — ${pkg.description || 'No description'} (${dl} downloads)`;

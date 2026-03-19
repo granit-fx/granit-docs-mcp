@@ -1,5 +1,9 @@
 # granit-mcp
 
+[![GitHub](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/granit-fx/granit-mcp)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=granit-fx_granit-mcp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=granit-fx_granit-mcp)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 Remote MCP server for the [Granit framework](https://granit-fx.dev) — gives AI
 assistants (Claude Code, Cursor, Windsurf) structured access to documentation,
 code navigation, and NuGet package metadata.

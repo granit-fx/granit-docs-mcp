@@ -16,7 +16,6 @@ export async function handlePackageInfo(input: PackageInfoInput, cache: KVCache)
     );
   }
 
-  // If a specific version was requested, check it exists
   if (input.version) {
     const match = info.versions.find((v) => v.version === input.version);
     if (!match) {
@@ -38,44 +37,53 @@ export async function handlePackageInfo(input: PackageInfoInput, cache: KVCache)
     '',
   ];
 
-  // Metadata
-  lines.push(`**Authors:** ${info.authors}`);
+  lines.push(...formatMetadata(info));
+  lines.push(...formatDependencyGroups(info.dependencyGroups));
+  lines.push(...formatVersionHistory(info.versions));
+
+  return lines.filter((l) => l !== undefined).join('\n');
+}
+
+function formatMetadata(info: import('../lib/nuget.js').PackageInfo): string[] {
+  const lines: string[] = [`**Authors:** ${info.authors}`];
   if (info.license) lines.push(`**License:** ${info.license}`);
   if (info.projectUrl) lines.push(`**Project:** ${info.projectUrl}`);
   if (info.tags.length > 0) lines.push(`**Tags:** ${info.tags.join(', ')}`);
   lines.push('');
+  return lines;
+}
 
-  // Dependency groups (for the latest version)
-  if (info.dependencyGroups.length > 0) {
-    lines.push('### Dependencies');
-    lines.push('');
-    for (const group of info.dependencyGroups) {
-      lines.push(`**${group.framework}**`);
-      if (group.dependencies.length === 0) {
-        lines.push('- *(none)*');
-      } else {
-        for (const dep of group.dependencies) {
-          lines.push(`- ${dep.id} ${dep.range}`);
-        }
-      }
-      lines.push('');
-    }
+function formatDependencyGroups(
+  groups: import('../lib/nuget.js').PackageInfo['dependencyGroups'],
+): string[] {
+  if (groups.length === 0) return [];
+
+  const lines: string[] = ['### Dependencies', ''];
+  for (const group of groups) {
+    lines.push(`**${group.framework}**`);
+    const depLines = group.dependencies.length === 0
+      ? ['- *(none)*']
+      : group.dependencies.map((dep) => `- ${dep.id} ${dep.range}`);
+    lines.push(...depLines, '');
   }
+  return lines;
+}
 
-  // Version history (last 10 listed)
-  const listedVersions = info.versions.filter((v) => v.listed);
+function formatVersionHistory(
+  versions: import('../lib/nuget.js').PackageVersion[],
+): string[] {
+  const listedVersions = versions.filter((v) => v.listed);
   const recentVersions = listedVersions.slice(-10).reverse();
-  if (recentVersions.length > 0) {
-    lines.push('### Recent versions');
-    lines.push('');
-    for (const v of recentVersions) {
-      const date = v.published ? ` (${v.published.split('T')[0]})` : '';
-      lines.push(`- v${v.version}${date}`);
-    }
-    if (listedVersions.length > 10) {
-      lines.push(`- *… and ${listedVersions.length - 10} earlier versions*`);
-    }
-  }
+  if (recentVersions.length === 0) return [];
 
-  return lines.filter((l) => l !== undefined).join('\n');
+  const lines: string[] = ['### Recent versions', ''];
+  const versionLines = recentVersions.map((v) => {
+    const date = v.published ? ` (${v.published.split('T')[0]})` : '';
+    return `- v${v.version}${date}`;
+  });
+  lines.push(...versionLines);
+  if (listedVersions.length > 10) {
+    lines.push(`- *… and ${listedVersions.length - 10} earlier versions*`);
+  }
+  return lines;
 }

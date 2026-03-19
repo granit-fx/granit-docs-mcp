@@ -13,7 +13,7 @@ export async function handlePublicApi(
   frontIndexUrl: string,
   cache: KVCache,
 ): Promise<string> {
-  const query = input.type.toLowerCase().replace(/^granit\.?/i, '');
+  const query = input.type.toLowerCase().replace(/^granit\.?/, '');
 
   // Search .NET
   if (input.repo !== 'front') {
@@ -45,7 +45,7 @@ function findDotnetType(
   symbols: CodeSymbol[],
   query: string,
 ): CodeSymbol | undefined {
-  const alpha = query.replace(/[^a-z0-9]/g, '');
+  const alpha = query.replaceAll(/[^a-z0-9]/g, '');
 
   // 1. Exact name match
   const exact = symbols.find(
@@ -68,9 +68,10 @@ function findDotnetType(
 }
 
 function formatDotnetApi(sym: CodeSymbol): string {
+  const namespace = sym.fqn.replace(`.${sym.name}`, '');
   const lines = [
     `## ${sym.name}`,
-    `**Kind:** ${sym.kind} · **Namespace:** ${sym.fqn.replace(`.${sym.name}`, '')}`,
+    `**Kind:** ${sym.kind} · **Namespace:** ${namespace}`,
     `**Project:** ${sym.project} · **File:** ${sym.file}`,
     '',
   ];
@@ -80,13 +81,12 @@ function formatDotnetApi(sym: CodeSymbol): string {
   } else {
     const grouped = groupBy(sym.members, (m) => m.kind);
     for (const [kind, members] of Object.entries(grouped)) {
-      lines.push(`### ${capitalize(kind)}s (${members.length})`);
-      lines.push('');
-      for (const m of members) {
+      const heading = `### ${capitalize(kind)}s (${members.length})`;
+      const memberLines = members.map((m) => {
         const ret = m.returnType ? ` → ${m.returnType}` : '';
-        lines.push(`- \`${m.signature}\`${ret}`);
-      }
-      lines.push('');
+        return `- \`${m.signature}\`${ret}`;
+      });
+      lines.push(heading, '', ...memberLines, '');
     }
   }
 
@@ -99,7 +99,7 @@ function findFrontExport(
   packages: { name: string; description: string; exports: FrontExport[] }[],
   query: string,
 ): { pkg: string; exp: FrontExport } | undefined {
-  const alpha = query.replace(/[^a-z0-9]/g, '');
+  const alpha = query.replaceAll(/[^a-z0-9]/g, '');
 
   for (const pkg of packages) {
     const match = pkg.exports.find(
@@ -129,11 +129,8 @@ function formatFrontApi(packageName: string, exp: FrontExport): string {
   ];
 
   if (exp.members && exp.members.length > 0) {
-    lines.push('### Members');
-    lines.push('');
-    for (const m of exp.members) {
-      lines.push(`- \`${m.signature}\``);
-    }
+    const memberLines = exp.members.map((m) => `- \`${m.signature}\``);
+    lines.push('### Members', '', ...memberLines);
   }
 
   return lines.join('\n');
@@ -145,7 +142,10 @@ function groupBy<T>(arr: T[], key: (item: T) => string): Record<string, T[]> {
   const result: Record<string, T[]> = {};
   for (const item of arr) {
     const k = key(item);
-    (result[k] ??= []).push(item);
+    if (!result[k]) {
+      result[k] = [];
+    }
+    result[k].push(item);
   }
   return result;
 }

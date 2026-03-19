@@ -172,7 +172,7 @@ export async function getPackageInfo(packageId: string, cache: KVCache): Promise
 
   if (entries.length === 0) return null;
 
-  const latest = entries[entries.length - 1];
+  const latest = entries.at(-1)!;
 
   const info: PackageInfo = {
     id: latest.id,

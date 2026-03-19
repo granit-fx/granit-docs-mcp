@@ -39,7 +39,7 @@ function urlSlug(url: string): string {
 
 /** Strips all non-alphanumeric for fuzzy comparison. */
 function alphaOnly(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return s.toLowerCase().replaceAll(/[^a-z0-9]/g, '');
 }
 
 /**
@@ -49,10 +49,16 @@ function alphaOnly(s: string): string {
 function toSlug(input: string): string {
   return input
     .replace(/^granit\.?/i, '')
-    .replace(/([a-z])([A-Z])/g, '$1-$2') // camelCase → kebab
+    .replaceAll(/([a-z])([A-Z])/g, '$1-$2') // camelCase → kebab
     .toLowerCase()
-    .replace(/[\s_.]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replaceAll(/[\s_.]+/g, '-')
+    .replaceAll(/^-+|-+$/g, '');
+}
+
+function slugRank(candidate: string, target: string): number {
+  if (candidate === target) return 0;
+  if (candidate.startsWith(target)) return 1;
+  return 2;
 }
 
 function findModule(entries: IndexEntry[], rawInput: string): IndexEntry | undefined {
@@ -76,8 +82,8 @@ function findModule(entries: IndexEntry[], rawInput: string): IndexEntry | undef
     .filter((e) => urlSlug(e.url).includes(slug) || alphaOnly(e.title).includes(alpha))
     .sort((a, b) => {
       // Prefer exact slug prefix over partial
-      const aSlug = urlSlug(a.url) === slug ? 0 : urlSlug(a.url).startsWith(slug) ? 1 : 2;
-      const bSlug = urlSlug(b.url) === slug ? 0 : urlSlug(b.url).startsWith(slug) ? 1 : 2;
+      const aSlug = slugRank(urlSlug(a.url), slug);
+      const bSlug = slugRank(urlSlug(b.url), slug);
       if (aSlug !== bSlug) return aSlug - bSlug;
       return a.title.length - b.title.length;
     });

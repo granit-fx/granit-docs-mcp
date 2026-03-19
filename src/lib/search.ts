@@ -65,9 +65,9 @@ function extractExcerpt(content: string, terms: string[], maxLength = 250): stri
 
   // Clean up
   excerpt = excerpt
-    .replace(/#{1,6}\s+/g, '')
-    .replace(/\n{2,}/g, ' ')
-    .replace(/\s{2,}/g, ' ');
+    .replaceAll(/#{1,6}\s+/g, '')
+    .replaceAll(/\n{2,}/g, ' ')
+    .replaceAll(/\s{2,}/g, ' ');
 
   if (end < content.length) excerpt += '…';
   return excerpt;

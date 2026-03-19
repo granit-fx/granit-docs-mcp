@@ -70,6 +70,32 @@ export async function handleSearchCode(
 
 // ─── .NET search ──────────────────────────────────────────────────────────────
 
+function searchDotnetMembers(
+  sym: CodeIndex['symbols'][number],
+  terms: string[],
+  kindFilter?: string,
+): ScoredResult[] {
+  const results: ScoredResult[] = [];
+  for (const member of sym.members) {
+    if (kindFilter && member.kind !== kindFilter) continue;
+
+    const memberScore = scoreMember(member.name, sym.name, member.signature, terms);
+    if (memberScore > 0) {
+      results.push({
+        name: `${sym.name}.${member.name}`,
+        fqn: `${sym.fqn}.${member.name}`,
+        kind: member.kind,
+        project: sym.project,
+        file: sym.file,
+        signature: member.signature,
+        repo: 'dotnet',
+        score: memberScore,
+      });
+    }
+  }
+  return results;
+}
+
 function searchDotnet(index: CodeIndex, input: SearchCodeInput): ScoredResult[] {
   const terms = tokenize(input.query);
   if (terms.length === 0) return [];
@@ -92,24 +118,7 @@ function searchDotnet(index: CodeIndex, input: SearchCodeInput): ScoredResult[] 
       });
     }
 
-    // Also search members
-    for (const member of sym.members) {
-      if (input.kind && member.kind !== input.kind) continue;
-
-      const memberScore = scoreMember(member.name, sym.name, member.signature, terms);
-      if (memberScore > 0) {
-        results.push({
-          name: `${sym.name}.${member.name}`,
-          fqn: `${sym.fqn}.${member.name}`,
-          kind: member.kind,
-          project: sym.project,
-          file: sym.file,
-          signature: member.signature,
-          repo: 'dotnet',
-          score: memberScore,
-        });
-      }
-    }
+    results.push(...searchDotnetMembers(sym, terms, input.kind));
   }
 
   return results;
