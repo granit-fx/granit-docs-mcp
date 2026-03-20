@@ -10,8 +10,8 @@ zone_id = "4981ce82f44db627f54c9f834fd77b69"
 
 [vars]
 SEARCH_INDEX_URL = "https://granit-fx.dev/search-index.json"
-CODE_INDEX_URL   = "https://github.com/granit-fx/granit-dotnet/releases/latest/download/code-index.json"
-FRONT_INDEX_URL  = "https://github.com/granit-fx/granit-front/releases/latest/download/front-index.json"
+CODE_INDEX_URL   = "https://raw.githubusercontent.com/granit-fx/granit-dotnet/{branch}/code-index.json"
+FRONT_INDEX_URL  = "https://raw.githubusercontent.com/granit-fx/granit-front/{branch}/front-index.json"
 
 [observability]
 enabled = true

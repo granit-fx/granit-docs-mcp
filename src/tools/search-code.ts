@@ -7,6 +7,7 @@ export interface SearchCodeInput {
   repo?: 'dotnet' | 'front';
   kind?: string;
   limit: number;
+  branch?: string;
 }
 
 interface ScoredResult {
@@ -29,14 +30,14 @@ export async function handleSearchCode(
   const results: ScoredResult[] = [];
 
   if (input.repo !== 'front') {
-    const codeIndex = await getCodeIndex(codeIndexUrl, cache);
+    const codeIndex = await getCodeIndex(codeIndexUrl, cache, input.branch);
     if (codeIndex) {
       results.push(...searchDotnet(codeIndex, input));
     }
   }
 
   if (input.repo !== 'dotnet') {
-    const frontIndex = await getFrontIndex(frontIndexUrl, cache);
+    const frontIndex = await getFrontIndex(frontIndexUrl, cache, input.branch);
     if (frontIndex) {
       results.push(...searchFront(frontIndex, input));
     }

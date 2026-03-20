@@ -5,6 +5,7 @@ import { getCodeIndex, getFrontIndex } from '../lib/code-index.js';
 export interface PublicApiInput {
   type: string;
   repo?: 'dotnet' | 'front';
+  branch?: string;
 }
 
 export async function handlePublicApi(
@@ -17,7 +18,7 @@ export async function handlePublicApi(
 
   // Search .NET
   if (input.repo !== 'front') {
-    const codeIndex = await getCodeIndex(codeIndexUrl, cache);
+    const codeIndex = await getCodeIndex(codeIndexUrl, cache, input.branch);
     if (codeIndex) {
       const match = findDotnetType(codeIndex.symbols, query);
       if (match) return formatDotnetApi(match);
@@ -26,7 +27,7 @@ export async function handlePublicApi(
 
   // Search Front
   if (input.repo !== 'dotnet') {
-    const frontIndex = await getFrontIndex(frontIndexUrl, cache);
+    const frontIndex = await getFrontIndex(frontIndexUrl, cache, input.branch);
     if (frontIndex) {
       const match = findFrontExport(frontIndex.packages, query);
       if (match) return formatFrontApi(match.pkg, match.exp);

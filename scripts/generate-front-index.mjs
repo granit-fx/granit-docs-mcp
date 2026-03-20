@@ -380,49 +380,51 @@ function updateBraceDepth(line, depth, started) {
   return { depth, started };
 }
 
+function isCommentOrEmpty(line) {
+  return !line || line.startsWith('//') || line.startsWith('/*') || line.startsWith('*');
+}
+
+/** Try to parse "name?: Type;" style property/method from a trimmed line. */
+function tryParseColonMember(trimmed) {
+  let nameEnd = 0;
+  while (nameEnd < trimmed.length && isWordChar(trimmed[nameEnd])) nameEnd++;
+  if (nameEnd === 0) return null;
+
+  const mName = trimmed.substring(0, nameEnd);
+  let pos = nameEnd;
+  const optional = trimmed[pos] === '?' ? '?' : '';
+  if (optional) pos++;
+  if (trimmed[pos] !== ':') return null;
+
+  pos++;
+  while (pos < trimmed.length && (trimmed[pos] === ' ' || trimmed[pos] === '\t')) pos++;
+  let mType = trimmed.substring(pos);
+  while (mType.endsWith(';') || mType.endsWith(' ')) mType = mType.slice(0, -1);
+  if (!mType) return null;
+
+  return {
+    name: mName,
+    kind: mType.includes('=>') || mType.startsWith('(') ? 'method' : 'property',
+    signature: `${mName}${optional}: ${mType}`,
+  };
+}
+
 /**
  * Attempts to parse a single interface member line, returning null if the line
  * is empty, a comment, or not a recognized member pattern.
  */
 function parseMemberLine(lines, idx) {
   const trimmed = lines[idx].trim();
-  if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
-    return null;
-  }
+  if (isCommentOrEmpty(trimmed)) return null;
 
-  // Parse member: name: type or name(...): type
-  let nameEnd = 0;
-  while (nameEnd < trimmed.length && isWordChar(trimmed[nameEnd])) nameEnd++;
-  if (nameEnd > 0) {
-    const mName = trimmed.substring(0, nameEnd);
-    let pos = nameEnd;
-    const optional = trimmed[pos] === '?' ? '?' : '';
-    if (optional) pos++;
-    if (trimmed[pos] === ':') {
-      pos++;
-      while (pos < trimmed.length && (trimmed[pos] === ' ' || trimmed[pos] === '\t')) pos++;
-      let mType = trimmed.substring(pos);
-      // Trim trailing semicolons and whitespace
-      while (mType.endsWith(';') || mType.endsWith(' ')) mType = mType.slice(0, -1);
-      if (mType) {
-        return {
-          name: mName,
-          kind: mType.includes('=>') || mType.startsWith('(') ? 'method' : 'property',
-          signature: `${mName}${optional}: ${mType}`,
-        };
-      }
-    }
-  }
+  const colonMember = tryParseColonMember(trimmed);
+  if (colonMember) return colonMember;
 
   // Method: name(...): ReturnType
   const methodMatch = trimmed.match(/^(\w+)\s*\(/);
   if (methodMatch) {
     const sig = collectSignature(lines, idx).replace(/;$/, '').trim();
-    return {
-      name: methodMatch[1],
-      kind: 'method',
-      signature: sig,
-    };
+    return { name: methodMatch[1], kind: 'method', signature: sig };
   }
 
   return null;

@@ -3,6 +3,7 @@ import { getCodeIndex, getFrontIndex } from '../lib/code-index.js';
 
 export interface ProjectGraphInput {
   repo?: 'dotnet' | 'front';
+  branch?: string;
 }
 
 export async function handleProjectGraph(
@@ -14,7 +15,7 @@ export async function handleProjectGraph(
   const sections: string[] = [];
 
   if (input.repo !== 'front') {
-    const codeIndex = await getCodeIndex(codeIndexUrl, cache);
+    const codeIndex = await getCodeIndex(codeIndexUrl, cache, input.branch);
     if (codeIndex && codeIndex.projectGraph.length > 0) {
       const projects = codeIndex.projectGraph;
       const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name));
@@ -33,7 +34,7 @@ export async function handleProjectGraph(
   }
 
   if (input.repo !== 'dotnet') {
-    const frontIndex = await getFrontIndex(frontIndexUrl, cache);
+    const frontIndex = await getFrontIndex(frontIndexUrl, cache, input.branch);
     if (frontIndex && frontIndex.packages.length > 0) {
       const pkgs = frontIndex.packages;
       const sorted = [...pkgs].sort((a, b) => a.name.localeCompare(b.name));

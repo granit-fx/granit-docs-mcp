@@ -67,9 +67,10 @@ export interface FrontIndex {
 export async function getCodeIndex(
   url: string,
   cache: KVCache,
+  branch?: string,
 ): Promise<CodeIndex | null> {
   try {
-    return await getIndex<CodeIndex>('code', url, cache);
+    return await getIndex<CodeIndex>('code', url, cache, branch);
   } catch {
     return null;
   }
@@ -78,9 +79,10 @@ export async function getCodeIndex(
 export async function getFrontIndex(
   url: string,
   cache: KVCache,
+  branch?: string,
 ): Promise<FrontIndex | null> {
   try {
-    return await getIndex<FrontIndex>('front', url, cache);
+    return await getIndex<FrontIndex>('front', url, cache, branch);
   } catch {
     return null;
   }

@@ -35,17 +35,37 @@ export interface KVCache {
   put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
 }
 
+// ─── Branch-aware URL resolution ─────────────────────────────────────────────
+
+const DEFAULT_BRANCH = 'develop';
+
+/**
+ * Replaces `{branch}` placeholder in a URL template.
+ * URLs without a placeholder are returned as-is.
+ */
+export function resolveIndexUrl(template: string, branch?: string): string {
+  return template.replace('{branch}', branch ?? DEFAULT_BRANCH);
+}
+
 // ─── Generic index fetcher ────────────────────────────────────────────────────
 
 /**
  * Fetches a JSON index from a URL, caching it in KV with a prefixed key.
  *
  * @param kind   - Index type (determines cache key prefix and TTL)
- * @param url    - URL to fetch the index from on cache miss
+ * @param url    - URL template (may contain `{branch}` placeholder)
  * @param cache  - KV namespace
+ * @param branch - Git branch to resolve in the URL (default: "develop")
  */
-export async function getIndex<T>(kind: IndexKind, url: string, cache: KVCache): Promise<T> {
-  const cacheKey = `${kind}:index`;
+export async function getIndex<T>(
+  kind: IndexKind,
+  url: string,
+  cache: KVCache,
+  branch?: string,
+): Promise<T> {
+  const resolvedBranch = branch ?? DEFAULT_BRANCH;
+  const resolvedUrl = resolveIndexUrl(url, resolvedBranch);
+  const cacheKey = `${kind}:${resolvedBranch}:index`;
 
   // 1. Try KV cache first
   const cached = await cache.get(cacheKey);
@@ -54,7 +74,7 @@ export async function getIndex<T>(kind: IndexKind, url: string, cache: KVCache):
   // 2. Fetch from origin
   let text: string;
   try {
-    const response = await fetch(url);
+    const response = await fetch(resolvedUrl);
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);
     }
@@ -68,7 +88,7 @@ export async function getIndex<T>(kind: IndexKind, url: string, cache: KVCache):
       console.warn(`[granit-mcp] ${kind} index fetch failed, serving stale cache: ${err}`);
       return JSON.parse(stale) as T;
     }
-    throw new Error(`Failed to fetch ${kind} index from ${url}: ${err}`);
+    throw new Error(`Failed to fetch ${kind} index from ${resolvedUrl}: ${err}`);
   }
 
   // 3. Cache fresh copy + long-lived stale fallback (7 days)

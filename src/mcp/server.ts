@@ -8,6 +8,7 @@ import { handlePackageInfo } from '../tools/package-info.js';
 import { handleSearchCode } from '../tools/search-code.js';
 import { handlePublicApi } from '../tools/public-api.js';
 import { handleProjectGraph } from '../tools/project-graph.js';
+import { handleListBranches } from '../tools/list-branches.js';
 import type { Env } from '../index.js';
 
 export function createMcpServer(env: Env): McpServer {
@@ -100,11 +101,12 @@ export function createMcpServer(env: Env): McpServer {
           .optional()
           .describe('Filter by symbol kind: "class", "interface", "method", "enum", "record", "function", "type"'),
         limit: z.number().int().min(1).max(20).default(10).describe('Maximum results (default 10, max 20)'),
+        branch: z.string().optional().describe('Git branch for the code index. Defaults to "develop". Use "main" for stable API.'),
       },
     },
-    async ({ query, repo, kind, limit }) => {
+    async ({ query, repo, kind, limit, branch }) => {
       const text = await handleSearchCode(
-        { query, repo, kind, limit: limit ?? 10 },
+        { query, repo, kind, limit: limit ?? 10, branch },
         codeIndexUrl,
         frontIndexUrl,
         cache,
@@ -130,10 +132,11 @@ export function createMcpServer(env: Env): McpServer {
           .enum(['dotnet', 'front'])
           .optional()
           .describe('Restrict to a specific repo. Omit to search both.'),
+        branch: z.string().optional().describe('Git branch for the code index. Defaults to "develop". Use "main" for stable API.'),
       },
     },
-    async ({ type, repo }) => {
-      const text = await handlePublicApi({ type, repo }, codeIndexUrl, frontIndexUrl, cache);
+    async ({ type, repo, branch }) => {
+      const text = await handlePublicApi({ type, repo, branch }, codeIndexUrl, frontIndexUrl, cache);
       return { content: [{ type: 'text', text }] };
     },
   );
@@ -151,10 +154,32 @@ export function createMcpServer(env: Env): McpServer {
           .enum(['dotnet', 'front'])
           .optional()
           .describe('Restrict to a specific repo. Omit to show both.'),
+        branch: z.string().optional().describe('Git branch for the code index. Defaults to "develop". Use "main" for stable API.'),
+      },
+    },
+    async ({ repo, branch }) => {
+      const text = await handleProjectGraph({ repo, branch }, codeIndexUrl, frontIndexUrl, cache);
+      return { content: [{ type: 'text', text }] };
+    },
+  );
+
+  // ─── list_branches ─────────────────────────────────────────────────────────
+  server.registerTool(
+    'list_branches',
+    {
+      description:
+        'Lists Git branches that have a committed code index, so you know which values ' +
+        'are valid for the "branch" parameter of search_code, get_public_api, and get_project_graph. ' +
+        'Queries the public GitHub API (no auth required).',
+      inputSchema: {
+        repo: z
+          .enum(['dotnet', 'front'])
+          .optional()
+          .describe('Restrict to a specific repo. Omit to check both.'),
       },
     },
     async ({ repo }) => {
-      const text = await handleProjectGraph({ repo }, codeIndexUrl, frontIndexUrl, cache);
+      const text = await handleListBranches({ repo });
       return { content: [{ type: 'text', text }] };
     },
   );
