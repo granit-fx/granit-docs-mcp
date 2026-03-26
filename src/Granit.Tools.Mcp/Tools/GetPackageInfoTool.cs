@@ -108,7 +108,8 @@ public static class GetPackageInfoTool
             {
                 string date = v.Published is not null
                     ? $" ({v.Published.Split('T')[0]})" : "";
-                lines.Add($"- v{v.Version}{date}");
+                string source = v.Source != "nuget.org" ? $" [{v.Source}]" : "";
+                lines.Add($"- v{v.Version}{date}{source}");
             }
             if (listed.Count > 10)
             {

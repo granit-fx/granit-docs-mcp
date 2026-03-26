@@ -57,7 +57,8 @@ public sealed class DocsStoreTests : IDisposable
             Path.Combine(Path.GetTempPath(), $"granit-mcp-test-{Guid.NewGuid():N}"),
             "https://granit-fx.dev/llms-full.txt",
             "unused",
-            "unused");
+            "unused",
+            null);
 
         _store = new DocsStore(config, NullLogger<DocsStore>.Instance);
         _store.Index(SampleMarkdown);

@@ -10,7 +10,8 @@ public static class ListPackagesTool
     [McpServerTool(Name = "nuget_list")]
     [Description(
         "Lists all published Granit NuGet packages with their latest version, " +
-        "description, and download count.")]
+        "description, and download count. When GRANIT_MCP_GITHUB_TOKEN is set, " +
+        "also includes pre-release packages from GitHub Packages.")]
     public static async Task<string> ExecuteAsync(
         NuGetClient nuget,
         CancellationToken ct = default)
@@ -30,7 +31,8 @@ public static class ListPackagesTool
                 : p.Downloads.ToString(System.Globalization.CultureInfo.InvariantCulture);
             string desc = !string.IsNullOrEmpty(p.Description)
                 ? p.Description : "No description";
-            return $"- **{p.Id}** v{p.Version} — {desc} ({dl} downloads)";
+            string source = p.Source != "nuget.org" ? $" [{p.Source}]" : "";
+            return $"- **{p.Id}** v{p.Version} — {desc} ({dl} downloads){source}";
         });
 
         return $"## Granit NuGet packages ({sorted.Count})\n\n" +
