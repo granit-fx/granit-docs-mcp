@@ -8,7 +8,8 @@ public sealed record GranitMcpConfig(
     string DataDir,
     string DocsUrl,
     string CodeIndexUrl,
-    string FrontIndexUrl)
+    string FrontIndexUrl,
+    string? GitHubToken)
 {
     private const string Prefix = "GRANIT_MCP_";
 
@@ -34,9 +35,13 @@ public sealed record GranitMcpConfig(
             $"{Prefix}FRONT_INDEX_URL")
             ?? "https://raw.githubusercontent.com/granit-fx/granit-front/{branch}/.mcp-front-index.json";
 
+        string? githubToken = Environment.GetEnvironmentVariable(
+            $"{Prefix}GITHUB_TOKEN");
+
         return new GranitMcpConfig(
             logLevel, refreshHours, dataDir,
-            docsUrl, codeIndexUrl, frontIndexUrl);
+            docsUrl, codeIndexUrl, frontIndexUrl,
+            githubToken);
     }
 
     private static T ParseEnum<T>(string key, T defaultValue)

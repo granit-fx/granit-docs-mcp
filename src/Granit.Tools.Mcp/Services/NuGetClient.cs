@@ -10,12 +10,17 @@ namespace Granit.Tools.Mcp.Services;
 /// </summary>
 public sealed class NuGetClient(
     IHttpClientFactory httpFactory,
+    GranitMcpConfig config,
     ILogger<NuGetClient> logger)
 {
     private const string SearchUrl =
         "https://azuresearch-usnc.nuget.org/query";
     private const string RegistrationUrl =
         "https://api.nuget.org/v3/registration5-gz-semver2";
+    private const string GitHubSearchUrl =
+        "https://nuget.pkg.github.com/granit-fx/query";
+    private const string GitHubRegistrationUrl =
+        "https://nuget.pkg.github.com/granit-fx/download";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -39,19 +44,18 @@ public sealed class NuGetClient(
 
         try
         {
-            using HttpClient http = httpFactory.CreateClient();
-            http.Timeout = TimeSpan.FromSeconds(15);
+            List<PackageSummary> packages = await SearchFeedAsync(
+                SearchUrl, "owner:granit-fx", prerelease: false,
+                "nuget.org", authToken: null, ct);
 
-            string url = $"{SearchUrl}?q=owner:granit-fx&take=50&prerelease=false";
-            string json = await http.GetStringAsync(url, ct);
-            NuGetSearchResponse? response = JsonSerializer.Deserialize<NuGetSearchResponse>(
-                json, JsonOptions);
+            if (config.GitHubToken is not null)
+            {
+                List<PackageSummary> ghPackages = await SearchFeedAsync(
+                    GitHubSearchUrl, "Granit", prerelease: true,
+                    "github", config.GitHubToken, ct);
 
-            List<PackageSummary> packages = response?.Data
-                .Select(p => new PackageSummary(
-                    p.Id, p.Version, p.Description ?? "",
-                    p.TotalDownloads, p.Authors, p.Tags))
-                .ToList() ?? [];
+                packages = MergePackageLists(packages, ghPackages);
+            }
 
             lock (_lock)
             {
@@ -65,12 +69,64 @@ public sealed class NuGetClient(
         {
             logger.LogWarning(ex, "Failed to fetch NuGet package list");
 
-            // Return stale cache if available
             lock (_lock)
             {
                 return _packageListCache?.Data ?? [];
             }
         }
+    }
+
+    private async Task<List<PackageSummary>> SearchFeedAsync(
+        string searchUrl, string query, bool prerelease,
+        string source, string? authToken, CancellationToken ct)
+    {
+        try
+        {
+            using HttpClient http = httpFactory.CreateClient();
+            http.Timeout = TimeSpan.FromSeconds(15);
+            if (authToken is not null)
+            {
+                http.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authToken);
+            }
+
+            string url = $"{searchUrl}?q={query}&take=50&prerelease={prerelease.ToString().ToLowerInvariant()}";
+            string json = await http.GetStringAsync(url, ct);
+            NuGetSearchResponse? response = JsonSerializer.Deserialize<NuGetSearchResponse>(
+                json, JsonOptions);
+
+            return response?.Data
+                .Where(p => p.Id.StartsWith("Granit.", StringComparison.OrdinalIgnoreCase))
+                .Select(p => new PackageSummary(
+                    p.Id, p.Version, p.Description ?? "",
+                    p.TotalDownloads, p.Authors, p.Tags, source))
+                .ToList() ?? [];
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogWarning(ex, "Failed to search {Source} feed", source);
+            return [];
+        }
+    }
+
+    private static List<PackageSummary> MergePackageLists(
+        List<PackageSummary> nugetOrg, List<PackageSummary> github)
+    {
+        var byId = nugetOrg.ToDictionary(p => p.Id, StringComparer.OrdinalIgnoreCase);
+
+        foreach (PackageSummary ghPkg in github)
+        {
+            if (byId.TryGetValue(ghPkg.Id, out PackageSummary? existing))
+            {
+                byId[ghPkg.Id] = existing with { Source = "nuget.org+github" };
+            }
+            else
+            {
+                byId[ghPkg.Id] = ghPkg;
+            }
+        }
+
+        return [.. byId.Values];
     }
 
     public async Task<PackageDetail?> GetPackageInfoAsync(
@@ -89,10 +145,53 @@ public sealed class NuGetClient(
 
         try
         {
+            PackageDetail? detail = await FetchRegistrationAsync(
+                RegistrationUrl, key, "nuget.org", authToken: null, ct);
+
+            if (config.GitHubToken is not null)
+            {
+                PackageDetail? ghDetail = await FetchRegistrationAsync(
+                    GitHubRegistrationUrl, key, "github", config.GitHubToken, ct);
+
+                detail = MergePackageDetails(detail, ghDetail);
+            }
+
+            if (detail is null)
+            {
+                return null;
+            }
+
+            lock (_lock)
+            {
+                _packageInfoCache[key] = new CachedData<PackageDetail>(
+                    detail, DateTime.UtcNow.AddHours(6));
+            }
+
+            return detail;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogWarning(ex,
+                "Failed to fetch NuGet info for {Package}", packageId);
+            return null;
+        }
+    }
+
+    private async Task<PackageDetail?> FetchRegistrationAsync(
+        string registrationUrl, string packageKey, string source,
+        string? authToken, CancellationToken ct)
+    {
+        try
+        {
             using HttpClient http = httpFactory.CreateClient();
             http.Timeout = TimeSpan.FromSeconds(15);
+            if (authToken is not null)
+            {
+                http.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authToken);
+            }
 
-            string url = $"{RegistrationUrl}/{key}/index.json";
+            string url = $"{registrationUrl}/{packageKey}/index.json";
             HttpResponseMessage response = await http.GetAsync(url, ct);
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -144,7 +243,7 @@ public sealed class NuGetClient(
             }
 
             CatalogEntry latest = entries[^1];
-            var detail = new PackageDetail(
+            return new PackageDetail(
                 latest.Id,
                 latest.Version,
                 latest.Description ?? "",
@@ -155,28 +254,52 @@ public sealed class NuGetClient(
                 entries.Select(e => new PackageVersionInfo(
                     e.Version,
                     e.Published,
-                    e.Listed != false)).ToList(),
+                    e.Listed != false,
+                    source)).ToList(),
                 (latest.DependencyGroups ?? []).Select(g =>
                     new PackageDepGroup(
                         g.TargetFramework,
                         (g.Dependencies ?? []).Select(d =>
                             new PackageDep(d.Id, d.Range)).ToList()))
                     .ToList());
-
-            lock (_lock)
-            {
-                _packageInfoCache[key] = new CachedData<PackageDetail>(
-                    detail, DateTime.UtcNow.AddHours(6));
-            }
-
-            return detail;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            logger.LogWarning(ex,
-                "Failed to fetch NuGet info for {Package}", packageId);
+            logger.LogWarning(ex, "Failed to fetch {Source} registration for {Package}",
+                source, packageKey);
             return null;
         }
+    }
+
+    private static PackageDetail? MergePackageDetails(
+        PackageDetail? nugetOrg, PackageDetail? github)
+    {
+        if (nugetOrg is null)
+        {
+            return github;
+        }
+
+        if (github is null)
+        {
+            return nugetOrg;
+        }
+
+        // Merge version lists, avoiding duplicates
+        var versionSet = nugetOrg.Versions
+            .ToDictionary(v => v.Version, StringComparer.OrdinalIgnoreCase);
+
+        foreach (PackageVersionInfo ghVersion in github.Versions)
+        {
+            if (!versionSet.ContainsKey(ghVersion.Version))
+            {
+                versionSet[ghVersion.Version] = ghVersion;
+            }
+        }
+
+        return nugetOrg with
+        {
+            Versions = [.. versionSet.Values.OrderBy(v => v.Version)],
+        };
     }
 
     private sealed record CachedData<T>(T Data, DateTime ExpiresAt)
@@ -187,7 +310,8 @@ public sealed class NuGetClient(
 
 public sealed record PackageSummary(
     string Id, string Version, string Description,
-    long Downloads, List<string> Authors, List<string> Tags);
+    long Downloads, List<string> Authors, List<string> Tags,
+    string Source = "nuget.org");
 
 public sealed record PackageDetail(
     string Id, string LatestVersion, string Description,
@@ -197,7 +321,8 @@ public sealed record PackageDetail(
     List<PackageDepGroup> DependencyGroups);
 
 public sealed record PackageVersionInfo(
-    string Version, string? Published, bool Listed);
+    string Version, string? Published, bool Listed,
+    string Source = "nuget.org");
 
 public sealed record PackageDepGroup(
     string Framework, List<PackageDep> Dependencies);

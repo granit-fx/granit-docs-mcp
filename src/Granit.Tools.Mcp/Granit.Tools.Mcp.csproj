@@ -9,16 +9,18 @@
     <Description>MCP server for the Granit framework — docs search (FTS5), code navigation, and NuGet package discovery</Description>
     <Authors>Jean-François Meyers</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/granit-fx/granit-tools-mcp</PackageProjectUrl>
+    <PackageProjectUrl>https://granit-fx.dev/tools/ai-assistants/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/granit-fx/granit-tools-mcp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>granit;mcp;claude-code;dotnet;documentation;fts5</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>granit-icon.png</PackageIcon>
     <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../granit-icon.png" Pack="true" PackagePath="granit-icon.png" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
