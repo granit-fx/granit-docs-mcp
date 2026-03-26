@@ -1,19 +1,19 @@
 using System.ComponentModel;
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp.Services;
 using ModelContextProtocol.Server;
 
-namespace Granit.Mcp.Tools;
+namespace Granit.Tools.Mcp.Tools;
 
 [McpServerToolType]
 public static class GetDocTool
 {
-    [McpServerTool(Name = "get_doc")]
+    [McpServerTool(Name = "docs_get")]
     [Description(
         "Retrieves the full content of a documentation article by ID. " +
-        "Use search_docs first to find the article ID.")]
+        "Use docs_search first to find the article ID.")]
     public static string Execute(
         DocsStore store,
-        [Description("Article ID returned by search_docs (e.g. \"doc-3\")")]
+        [Description("Article ID returned by docs_search (e.g. \"doc-3\")")]
         string id)
     {
         string? status = store.EnsureReadyOrStatus();
@@ -26,7 +26,7 @@ public static class GetDocTool
         if (article is null)
         {
             return $"Article \"{id}\" not found. " +
-                   "Use search_docs to find valid IDs.";
+                   "Use docs_search to find valid IDs.";
         }
 
         return $"# {article.Title}\n\n" +

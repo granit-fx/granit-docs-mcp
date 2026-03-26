@@ -1,7 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 
-namespace Granit.Mcp.Services;
+namespace Granit.Tools.Mcp.Services;
 
 /// <summary>
 /// SQLite FTS5-backed documentation store.

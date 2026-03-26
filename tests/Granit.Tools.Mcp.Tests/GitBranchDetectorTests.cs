@@ -1,7 +1,7 @@
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp.Services;
 using Shouldly;
 
-namespace Granit.Mcp.Tests;
+namespace Granit.Tools.Mcp.Tests;
 
 public sealed class GitBranchDetectorTests
 {

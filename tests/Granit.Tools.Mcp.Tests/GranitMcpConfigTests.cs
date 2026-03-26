@@ -1,6 +1,6 @@
 using Shouldly;
 
-namespace Granit.Mcp.Tests;
+namespace Granit.Tools.Mcp.Tests;
 
 public sealed class GranitMcpConfigTests
 {

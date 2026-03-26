@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Granit.Mcp;
+namespace Granit.Tools.Mcp;
 
 public sealed record GranitMcpConfig(
     LogLevel LogLevel,

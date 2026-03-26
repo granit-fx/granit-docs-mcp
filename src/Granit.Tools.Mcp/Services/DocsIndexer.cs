@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Granit.Mcp.Services;
+namespace Granit.Tools.Mcp.Services;
 
 /// <summary>
 /// Background service that fetches llms-full.txt and indexes it into

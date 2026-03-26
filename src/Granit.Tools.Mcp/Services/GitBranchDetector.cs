@@ -1,4 +1,4 @@
-namespace Granit.Mcp.Services;
+namespace Granit.Tools.Mcp.Services;
 
 /// <summary>
 /// Detects the current Git branch from .git/HEAD in the working directory.

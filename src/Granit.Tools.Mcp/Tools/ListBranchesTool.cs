@@ -1,17 +1,17 @@
 using System.ComponentModel;
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp.Services;
 using ModelContextProtocol.Server;
 
-namespace Granit.Mcp.Tools;
+namespace Granit.Tools.Mcp.Tools;
 
 [McpServerToolType]
 public static class ListBranchesTool
 {
-    [McpServerTool(Name = "list_branches")]
+    [McpServerTool(Name = "code_list_branches")]
     [Description(
         "Lists Git branches that have a committed code index, so you know which " +
-        "values are valid for the \"branch\" parameter of search_code, get_public_api, " +
-        "and get_project_graph.")]
+        "values are valid for the \"branch\" parameter of code_search, code_get_api, " +
+        "and code_get_graph.")]
     public static async Task<string> ExecuteAsync(
         CodeIndexClient client,
         [Description("Restrict to a specific repo. Omit to check both.")]

@@ -1,13 +1,13 @@
 using System.ComponentModel;
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp.Services;
 using ModelContextProtocol.Server;
 
-namespace Granit.Mcp.Tools;
+namespace Granit.Tools.Mcp.Tools;
 
 [McpServerToolType]
 public static class GetPackageInfoTool
 {
-    [McpServerTool(Name = "get_package_info")]
+    [McpServerTool(Name = "nuget_get")]
     [Description(
         "Retrieves detailed information about a specific Granit NuGet package: " +
         "all published versions, dependency groups per target framework, license, and tags.")]
@@ -24,7 +24,7 @@ public static class GetPackageInfoTool
         if (info is null)
         {
             return $"Package \"{package}\" not found on NuGet.\n\n" +
-                   "Tip: use `list_packages` to see all available Granit packages.";
+                   "Tip: use `nuget_list` to see all available Granit packages.";
         }
 
         if (version is not null)

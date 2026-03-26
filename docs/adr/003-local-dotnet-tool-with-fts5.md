@@ -82,13 +82,13 @@ Source: <https://github.com/DuendeSoftware/products/tree/main/docs-mcp>
 **Migrate to a local .NET 10 dotnet tool** that consolidates all MCP
 capabilities into a single self-contained binary.
 
-The tool will be distributed as `Granit.Mcp` on NuGet and configured as a
+The tool will be distributed as `Granit.Tools.Mcp` on NuGet and configured as a
 stdio MCP server in Claude Code / Cursor settings.
 
 ### Architecture
 
 ```text
-Claude Code ──stdio──> Granit.Mcp (local .NET 10 tool)
+Claude Code ──stdio──> Granit.Tools.Mcp (local .NET 10 tool)
                          |-- Docs tools ------> SQLite FTS5 (file-backed)
                          |                        ^ indexed from llms-full.txt
                          |-- Code tools ------> JSON indexes (GitHub raw, branch-aware)
@@ -120,7 +120,7 @@ Claude Code ──stdio──> Granit.Mcp (local .NET 10 tool)
 
 Running locally, the tool can read `.git/HEAD` from the current
 working directory to detect the active branch. Code index tools
-(`search_code`, `get_public_api`, `get_project_graph`) use this
+(`code_search`, `code_get_api`, `code_get_graph`) use this
 branch by default, eliminating the need to pass `branch` manually.
 Explicit `branch` parameter still overrides when provided.
 
@@ -134,30 +134,28 @@ file (`~/.granit-mcp/logs/`).
 
 | Current | New | Change |
 | ------- | --- | ------ |
-| `search_granit_docs` | `search_docs` | FTS5. Lightweight results. |
-| `get_module_reference` | `get_doc` | Generic fetch by ID. |
-| `list_patterns` | `list_patterns` | FTS5 category filter. |
-| `search_code` | `search_code` | Unchanged (JSON index). |
-| `get_public_api` | `get_public_api` | Unchanged. |
-| `get_project_graph` | `get_project_graph` | Unchanged. |
-| `list_branches` | `list_branches` | Unchanged. |
-| `list_packages` | `list_packages` | Unchanged. |
-| `get_package_info` | `get_package_info` | Unchanged. |
-| *(new)* | `get_doc` | Search/fetch split. |
+| `search_granit_docs` | `docs_search` | FTS5. Lightweight results. |
+| `get_module_reference` | `docs_get` | Generic fetch by ID. |
+| `list_patterns` | `docs_list_patterns` | FTS5 category filter. |
+| `search_code` | `code_search` | Unchanged (JSON index). |
+| `get_public_api` | `code_get_api` | Unchanged. |
+| `get_project_graph` | `code_get_graph` | Unchanged. |
+| `list_branches` | `code_list_branches` | Unchanged. |
+| `list_packages` | `nuget_list` | Unchanged. |
+| `get_package_info` | `nuget_get` | Unchanged. |
 
-Total: 10 tools (was 9). The key change is splitting search from fetch for
+Total: 9 tools. The key change is splitting search from fetch for
 documentation, reducing average token consumption by ~60-80% for docs queries.
 
 ### Transport
 
 - **Primary**: stdio (for Claude Code `mcpServers` config and Cursor/Rider)
-- **Secondary**: HTTP on localhost (for testing and web-based MCP clients)
 - No remote deployment — the tool runs on the developer's machine
 
 ### Distribution
 
 ```bash
-dotnet tool install --global Granit.Mcp
+dotnet tool install --global Granit.Tools.Mcp
 ```
 
 Claude Code `~/.claude.json` configuration:
@@ -166,7 +164,7 @@ Claude Code `~/.claude.json` configuration:
 {
   "mcpServers": {
     "granit": {
-      "command": "granit-mcp",
+      "command": "granit-tools-mcp",
       "args": []
     }
   }
@@ -298,7 +296,7 @@ await builder.Build().RunAsync();
 [McpServerToolType]
 public static class SearchDocsTool
 {
-    [McpServerTool(Name = "search_docs")]
+    [McpServerTool(Name = "docs_search")]
     [Description("FTS5 search across Granit docs.")]
     public static async Task<string> ExecuteAsync(
         DocsIndexStore store,

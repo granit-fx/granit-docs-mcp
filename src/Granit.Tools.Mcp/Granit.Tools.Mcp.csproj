@@ -3,14 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>granit-mcp</ToolCommandName>
-    <PackageId>Granit.Mcp</PackageId>
+    <ToolCommandName>granit-tools-mcp</ToolCommandName>
+    <PackageId>Granit.Tools.Mcp</PackageId>
     <Version>1.0.0</Version>
     <Description>MCP server for the Granit framework — docs search (FTS5), code navigation, and NuGet package discovery</Description>
     <Authors>Jean-François Meyers</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/granit-fx/granit-mcp</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/granit-fx/granit-mcp</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/granit-fx/granit-tools-mcp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/granit-fx/granit-tools-mcp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>granit;mcp;claude-code;dotnet;documentation;fts5</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -23,10 +23,10 @@
 
   <ItemGroup>
     <PackageReference Include="ModelContextProtocol" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
-    <PackageReference Include="Markdig" Version="0.39.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.5" />
+    <PackageReference Include="Markdig" Version="1.1.1" />
   </ItemGroup>
 
 </Project>

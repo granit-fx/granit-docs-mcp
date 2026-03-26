@@ -1,7 +1,7 @@
-# granit-mcp
+# granit-tools-mcp
 
-[![GitHub](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/granit-fx/granit-mcp)
-[![NuGet](https://img.shields.io/nuget/v/Granit.Mcp?logo=nuget)](https://www.nuget.org/packages/Granit.Mcp)
+[![GitHub](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/granit-fx/granit-tools-mcp)
+[![NuGet](https://img.shields.io/nuget/v/Granit.Tools.Mcp?logo=nuget)](https://www.nuget.org/packages/Granit.Tools.Mcp)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=granit-fx_granit-mcp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=granit-fx_granit-mcp)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
@@ -12,36 +12,36 @@ code navigation, and NuGet package metadata.
 Built as a **.NET 10 dotnet tool** with **SQLite FTS5** for full-text search
 and the [Model Context Protocol SDK](https://modelcontextprotocol.io/).
 
-## Tools (10)
+## Tools (9)
 
 ### Documentation
 
 | Tool | Description |
 | ---- | ----------- |
-| `search_docs` | FTS5 search — returns ID, title, snippet |
-| `get_doc` | Full article content by ID |
-| `list_patterns` | Architecture patterns list |
+| `docs_search` | FTS5 search — returns ID, title, snippet |
+| `docs_get` | Full article content by ID |
+| `docs_list_patterns` | Architecture patterns list |
 
 ### Code navigation
 
 | Tool | Description |
 | ---- | ----------- |
-| `search_code` | Search symbols across .NET and TS |
-| `get_public_api` | Public API of a type with signatures |
-| `get_project_graph` | Project/package dependency graph |
-| `list_branches` | Branches with committed code indexes |
+| `code_search` | Search symbols across .NET and TS |
+| `code_get_api` | Public API of a type with signatures |
+| `code_get_graph` | Project/package dependency graph |
+| `code_list_branches` | Branches with committed code indexes |
 
 ### NuGet packages
 
 | Tool | Description |
 | ---- | ----------- |
-| `list_packages` | Granit.\* packages with version/downloads |
-| `get_package_info` | Versions, deps, frameworks, license |
+| `nuget_list` | Granit.\* packages with version/downloads |
+| `nuget_get` | Versions, deps, frameworks, license |
 
 ## Install
 
 ```bash
-dotnet tool install --global Granit.Mcp
+dotnet tool install --global Granit.Tools.Mcp
 ```
 
 ## Use with Claude Code
@@ -50,7 +50,7 @@ dotnet tool install --global Granit.Mcp
 {
   "mcpServers": {
     "granit": {
-      "command": "granit-mcp"
+      "command": "granit-tools-mcp"
     }
   }
 }
@@ -61,12 +61,12 @@ dotnet tool install --global Granit.Mcp
 Add the MCP server in **Settings > MCP Servers**:
 
 - **Name:** `granit`
-- **Command:** `granit-mcp`
+- **Command:** `granit-tools-mcp`
 
 ## Architecture
 
 ```text
-Claude Code ──stdio──> Granit.Mcp (local .NET 10 tool)
+Claude Code ──stdio──> Granit.Tools.Mcp (local .NET 10 tool)
                          |-- Docs ---------> SQLite FTS5
                          |                     ^ llms-full.txt (auto-generated)
                          |-- Code ---------> .mcp-*-index.json (GitHub raw)
@@ -94,7 +94,7 @@ parameter overrides this.
 
 ```bash
 dotnet build
-dotnet run --project src/Granit.Mcp
+dotnet run --project src/Granit.Tools.Mcp
 ```
 
 ## ADRs

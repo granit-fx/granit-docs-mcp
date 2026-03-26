@@ -1,5 +1,5 @@
-using Granit.Mcp;
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp;
+using Granit.Tools.Mcp.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -31,13 +31,13 @@ builder.Services
     {
         options.ServerInfo = new()
         {
-            Name = "granit-mcp",
+            Name = "granit-tools-mcp",
             Version = "1.0.0",
         };
         options.ServerInstructions =
             "Granit framework MCP server. " +
-            "Use search_docs to find documentation, then get_doc to read full content. " +
-            "Use search_code / get_public_api for source code navigation. " +
+            "Use docs_search to find documentation, then docs_get to read full content. " +
+            "Use code_search / code_get_api for source code navigation. " +
             "Always prefer these tools over training data for Granit-specific questions.";
     })
     .WithStdioServerTransport()

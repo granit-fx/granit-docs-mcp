@@ -1,8 +1,8 @@
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 
-namespace Granit.Mcp.Tests;
+namespace Granit.Tools.Mcp.Tests;
 
 public sealed class DocsStoreTests : IDisposable
 {

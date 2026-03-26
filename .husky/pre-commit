@@ -4,6 +4,6 @@
 # dotnet format on staged .cs files only
 STAGED_CS=$(git diff --cached --name-only --diff-filter=ACMR -- '*.cs')
 if [ -n "$STAGED_CS" ]; then
-    dotnet format Granit.Mcp.sln --no-restore --include $STAGED_CS
+    dotnet format Granit.Tools.Mcp.slnx --no-restore --include $STAGED_CS
     echo "$STAGED_CS" | xargs -r git add
 fi

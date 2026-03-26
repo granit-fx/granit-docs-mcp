@@ -1,13 +1,13 @@
 using System.ComponentModel;
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp.Services;
 using ModelContextProtocol.Server;
 
-namespace Granit.Mcp.Tools;
+namespace Granit.Tools.Mcp.Tools;
 
 [McpServerToolType]
 public static class ListPackagesTool
 {
-    [McpServerTool(Name = "list_packages")]
+    [McpServerTool(Name = "nuget_list")]
     [Description(
         "Lists all published Granit NuGet packages with their latest version, " +
         "description, and download count.")]

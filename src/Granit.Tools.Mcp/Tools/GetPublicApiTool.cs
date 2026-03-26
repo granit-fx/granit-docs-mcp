@@ -1,14 +1,14 @@
 using System.ComponentModel;
-using Granit.Mcp.Models;
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp.Models;
+using Granit.Tools.Mcp.Services;
 using ModelContextProtocol.Server;
 
-namespace Granit.Mcp.Tools;
+namespace Granit.Tools.Mcp.Tools;
 
 [McpServerToolType]
 public static class GetPublicApiTool
 {
-    [McpServerTool(Name = "get_public_api")]
+    [McpServerTool(Name = "code_get_api")]
     [Description(
         "Retrieves the full public API surface of a Granit type — all public methods, " +
         "properties, and events with their signatures. Works for both .NET types and " +
@@ -53,7 +53,7 @@ public static class GetPublicApiTool
         }
 
         return $"Type \"{type}\" not found in the code index.\n\n" +
-               "Tip: use `search_code` to find the correct type name.";
+               "Tip: use `code_search` to find the correct type name.";
     }
 
     private static CodeSymbol? FindDotnetType(

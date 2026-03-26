@@ -1,8 +1,8 @@
 using System.Text.Json;
-using Granit.Mcp.Models;
+using Granit.Tools.Mcp.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Granit.Mcp.Services;
+namespace Granit.Tools.Mcp.Services;
 
 /// <summary>
 /// NuGet API client with in-memory caching.

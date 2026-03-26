@@ -1,17 +1,17 @@
 using System.ComponentModel;
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp.Services;
 using ModelContextProtocol.Server;
 
-namespace Granit.Mcp.Tools;
+namespace Granit.Tools.Mcp.Tools;
 
 [McpServerToolType]
 public static class SearchDocsTool
 {
-    [McpServerTool(Name = "search_docs")]
+    [McpServerTool(Name = "docs_search")]
     [Description(
         "Full-text search across Granit framework documentation. " +
         "Returns lightweight results (ID, title, category, snippet). " +
-        "Use get_doc with the returned ID to read full content.")]
+        "Use docs_get with the returned ID to read full content.")]
     public static string Execute(
         DocsStore store,
         [Description("Search query in plain English or keywords")]

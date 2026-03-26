@@ -1,4 +1,4 @@
-# granit-mcp
+# granit-tools-mcp
 
 Local MCP server for the Granit framework. Distributed as a .NET 10
 dotnet tool. Provides documentation search (SQLite FTS5), code
@@ -14,7 +14,7 @@ navigation, and NuGet package discovery via the Model Context Protocol.
 ## Architecture
 
 ```text
-Claude Code ──stdio──> Granit.Mcp (local .NET 10 tool)
+Claude Code ──stdio──> Granit.Tools.Mcp (local .NET 10 tool)
                          |-- Docs tools ------> SQLite FTS5
                          |                        ^ indexed from llms-full.txt
                          |-- Code tools ------> .mcp-*-index.json (GitHub raw)
@@ -26,22 +26,22 @@ Claude Code ──stdio──> Granit.Mcp (local .NET 10 tool)
 
 | Path | Purpose |
 | ---- | ------- |
-| `src/Granit.Mcp/Program.cs` | Host setup, MCP transport |
-| `src/Granit.Mcp/GranitMcpConfig.cs` | Env var configuration |
-| `src/Granit.Mcp/Services/DocsStore.cs` | SQLite FTS5 index + search |
-| `src/Granit.Mcp/Services/DocsIndexer.cs` | Background llms-full.txt fetcher |
-| `src/Granit.Mcp/Services/CodeIndexClient.cs` | Branch-aware code index cache |
-| `src/Granit.Mcp/Services/NuGetClient.cs` | NuGet API client |
-| `src/Granit.Mcp/Services/GitBranchDetector.cs` | .git/HEAD branch detection |
-| `src/Granit.Mcp/Tools/*.cs` | 10 MCP tool handlers |
-| `tests/Granit.Mcp.Tests/*.cs` | xUnit tests (FTS5, config, branch) |
+| `src/Granit.Tools.Mcp/Program.cs` | Host setup, MCP transport |
+| `src/Granit.Tools.Mcp/GranitMcpConfig.cs` | Env var configuration |
+| `src/Granit.Tools.Mcp/Services/DocsStore.cs` | SQLite FTS5 index + search |
+| `src/Granit.Tools.Mcp/Services/DocsIndexer.cs` | Background llms-full.txt fetcher |
+| `src/Granit.Tools.Mcp/Services/CodeIndexClient.cs` | Branch-aware code index cache |
+| `src/Granit.Tools.Mcp/Services/NuGetClient.cs` | NuGet API client |
+| `src/Granit.Tools.Mcp/Services/GitBranchDetector.cs` | .git/HEAD branch detection |
+| `src/Granit.Tools.Mcp/Tools/*.cs` | 9 MCP tool handlers |
+| `tests/Granit.Tools.Mcp.Tests/*.cs` | xUnit tests (FTS5, config, branch) |
 
 ## Building
 
 ```bash
 dotnet build
 dotnet pack -o nupkgs
-dotnet tool install --global --add-source nupkgs Granit.Mcp
+dotnet tool install --global --add-source nupkgs Granit.Tools.Mcp
 ```
 
 ## Configuration

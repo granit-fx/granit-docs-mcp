@@ -1,8 +1,8 @@
 using System.Text.Json;
-using Granit.Mcp.Models;
+using Granit.Tools.Mcp.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Granit.Mcp.Services;
+namespace Granit.Tools.Mcp.Services;
 
 /// <summary>
 /// Fetches and caches .mcp-code-index.json and .mcp-front-index.json
@@ -48,7 +48,7 @@ public sealed class CodeIndexClient(
     {
         var results = new List<BranchInfo>();
         using HttpClient http = httpFactory.CreateClient();
-        http.DefaultRequestHeaders.Add("User-Agent", "granit-mcp");
+        http.DefaultRequestHeaders.Add("User-Agent", "granit-tools-mcp");
 
         if (repo is null or "dotnet")
         {
@@ -147,7 +147,7 @@ public sealed class CodeIndexClient(
             string fileUrl = $"https://api.github.com/repos/{owner}/{repo}/contents/{indexFile}?ref={b.Name}";
             var req = new HttpRequestMessage(HttpMethod.Head, fileUrl);
             req.Headers.Add("Accept", "application/vnd.github+json");
-            req.Headers.Add("User-Agent", "granit-mcp");
+            req.Headers.Add("User-Agent", "granit-tools-mcp");
             HttpResponseMessage res = await http.SendAsync(req, ct);
             return new BranchInfo(repo, b.Name, res.IsSuccessStatusCode);
         });

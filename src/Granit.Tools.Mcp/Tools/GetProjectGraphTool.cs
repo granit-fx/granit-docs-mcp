@@ -1,14 +1,14 @@
 using System.ComponentModel;
-using Granit.Mcp.Models;
-using Granit.Mcp.Services;
+using Granit.Tools.Mcp.Models;
+using Granit.Tools.Mcp.Services;
 using ModelContextProtocol.Server;
 
-namespace Granit.Mcp.Tools;
+namespace Granit.Tools.Mcp.Tools;
 
 [McpServerToolType]
 public static class GetProjectGraphTool
 {
-    [McpServerTool(Name = "get_project_graph")]
+    [McpServerTool(Name = "code_get_graph")]
     [Description(
         "Shows the project/package dependency graph for the Granit framework. " +
         "Lists all .NET projects and/or TypeScript packages.")]

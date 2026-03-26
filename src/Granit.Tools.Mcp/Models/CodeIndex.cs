@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Granit.Mcp.Models;
+namespace Granit.Tools.Mcp.Models;
 
 public sealed record CodeIndex(
     [property: JsonPropertyName("repo")] string Repo,

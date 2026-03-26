@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Granit.Mcp.Models;
+namespace Granit.Tools.Mcp.Models;
 
 // NuGet Search API
 public sealed record NuGetSearchResponse(

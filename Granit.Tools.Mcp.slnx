@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/Granit.Tools.Mcp/Granit.Tools.Mcp.csproj" />
+  <Project Path="tests/Granit.Tools.Mcp.Tests/Granit.Tools.Mcp.Tests.csproj" />
+</Solution>

@@ -44,7 +44,7 @@ jobs:
         if: env.SONAR_TOKEN != ''
         run: |
           dotnet sonarscanner begin \
-            /k:"granit-fx_granit-mcp" \
+            /k:"granit-fx_granit-tools-mcp" \
             /o:"granit-fx" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.token="$SONAR_TOKEN" \
@@ -64,7 +64,7 @@ jobs:
             --logger "trx;LogFileName=results.trx" \
             --collect:"XPlat Code Coverage" \
             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
-               DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include="[Granit.Mcp]*" \
+               DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include="[Granit.Tools.Mcp]*" \
                DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude="[*.Tests]*"
 
       - name: SonarCloud End
