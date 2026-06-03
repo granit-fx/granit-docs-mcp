@@ -12,12 +12,13 @@ public static class SearchCodeTool
     [Description(
         "Search across Granit source code symbols (types, methods, interfaces, enums). " +
         "Returns ranked matches with name, kind, project, file path, and signature. " +
-        "Searches pre-built code indexes for both .NET (granit-dotnet) and TypeScript (granit-front).")]
+        "Searches the configured code indexes — the built-in .NET (granit-dotnet) and " +
+        "TypeScript (granit-front) repos plus any extra repos defined in repos.json.")]
     public static async Task<string> ExecuteAsync(
         CodeIndexClient client,
         [Description("Search query — type name, method name, or keywords")]
         string query,
-        [Description("Restrict search to a specific repo. Omit to search both.")]
+        [Description("Restrict to a configured repo id (e.g. \"dotnet\", \"front\", or a repos.json id). Omit to search all.")]
         string? repo = null,
         [Description("Filter by symbol kind: class, interface, method, enum, record, function, type")]
         string? kind = null,
@@ -36,21 +37,15 @@ public static class SearchCodeTool
 
         var results = new List<ScoredResult>();
 
-        if (repo is not "front")
+        foreach (LoadedIndex loaded in await client.GetIndexesAsync(repo, branch, ct))
         {
-            CodeIndex? codeIndex = await client.GetCodeIndexAsync(branch, ct);
-            if (codeIndex is not null)
+            if (loaded.Dotnet is { } codeIndex)
             {
-                results.AddRange(SearchDotnet(codeIndex, terms, kind));
+                results.AddRange(SearchDotnet(codeIndex, terms, kind, loaded.Repo.Id));
             }
-        }
-
-        if (repo is not "dotnet")
-        {
-            FrontIndex? frontIndex = await client.GetFrontIndexAsync(branch, ct);
-            if (frontIndex is not null)
+            else if (loaded.Front is { } frontIndex)
             {
-                results.AddRange(SearchFront(frontIndex, terms, kind));
+                results.AddRange(SearchFront(frontIndex, terms, kind, loaded.Repo.Id));
             }
         }
 
@@ -95,7 +90,7 @@ public static class SearchCodeTool
     }
 
     private static List<ScoredResult> SearchDotnet(
-        CodeIndex index, string[] terms, string? kindFilter)
+        CodeIndex index, string[] terms, string? kindFilter, string repoId)
     {
         var results = new List<ScoredResult>();
 
@@ -113,7 +108,7 @@ public static class SearchCodeTool
             {
                 results.Add(new ScoredResult(
                     sym.Name, sym.Fqn, sym.Kind, sym.Project,
-                    sym.File, null, "dotnet", score));
+                    sym.File, null, repoId, score));
             }
 
             foreach (CodeMember member in sym.Members)
@@ -132,7 +127,7 @@ public static class SearchCodeTool
                         $"{sym.Fqn}.{member.Name}",
                         member.Kind, sym.Project,
                         sym.File, member.Signature,
-                        "dotnet", memberScore));
+                        repoId, memberScore));
                 }
             }
         }
@@ -141,7 +136,7 @@ public static class SearchCodeTool
     }
 
     private static List<ScoredResult> SearchFront(
-        FrontIndex index, string[] terms, string? kindFilter)
+        FrontIndex index, string[] terms, string? kindFilter, string repoId)
     {
         var results = new List<ScoredResult>();
 
@@ -162,7 +157,7 @@ public static class SearchCodeTool
                         exp.Name, $"{pkg.Name}/{exp.Name}",
                         exp.Kind, pkg.Name,
                         null, exp.Signature,
-                        "front", score));
+                        repoId, score));
                 }
             }
         }

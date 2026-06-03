@@ -17,7 +17,7 @@ public static class GetPublicApiTool
         CodeIndexClient client,
         [Description("Type name, e.g. \"IBlobStorage\", \"GranitModule\". Case-insensitive.")]
         string type,
-        [Description("Restrict to a specific repo. Omit to search both.")]
+        [Description("Restrict to a configured repo id (e.g. \"dotnet\", \"front\", or a repos.json id). Omit to search all.")]
         string? repo = null,
         [Description("Git branch for the code index. Defaults to detected branch or develop.")]
         string? branch = null,
@@ -26,10 +26,9 @@ public static class GetPublicApiTool
         string query = type.ToLowerInvariant()
             .Replace("granit.", "", StringComparison.Ordinal);
 
-        if (repo is not "front")
+        foreach (LoadedIndex loaded in await client.GetIndexesAsync(repo, branch, ct))
         {
-            CodeIndex? codeIndex = await client.GetCodeIndexAsync(branch, ct);
-            if (codeIndex is not null)
+            if (loaded.Dotnet is { } codeIndex)
             {
                 CodeSymbol? match = FindDotnetType(codeIndex.Symbols, query);
                 if (match is not null)
@@ -37,12 +36,7 @@ public static class GetPublicApiTool
                     return FormatDotnetApi(match);
                 }
             }
-        }
-
-        if (repo is not "dotnet")
-        {
-            FrontIndex? frontIndex = await client.GetFrontIndexAsync(branch, ct);
-            if (frontIndex is not null)
+            else if (loaded.Front is { } frontIndex)
             {
                 (string Pkg, FrontExport Export)? match = FindFrontExport(frontIndex.Packages, query);
                 if (match is not null)

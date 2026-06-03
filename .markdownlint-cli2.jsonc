@@ -1,0 +1,10 @@
+{
+  // Keep a Changelog repeats "Added" / "Changed" / "Removed" headings across
+  // versions — only flag duplicate headings under the same parent.
+  "config": {
+    "MD024": { "siblings_only": true },
+    // File-path and field-description tables legitimately exceed 80 cols;
+    // prose stays wrapped at 80.
+    "MD013": { "tables": false }
+  }
+}

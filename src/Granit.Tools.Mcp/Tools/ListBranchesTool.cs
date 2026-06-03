@@ -14,7 +14,7 @@ public static class ListBranchesTool
         "and code_get_graph.")]
     public static async Task<string> ExecuteAsync(
         CodeIndexClient client,
-        [Description("Restrict to a specific repo. Omit to check both.")]
+        [Description("Restrict to a configured repo id (e.g. \"dotnet\", \"front\", or a repos.json id). Omit to check all.")]
         string? repo = null,
         CancellationToken ct = default)
     {

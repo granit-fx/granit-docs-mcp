@@ -15,6 +15,26 @@ public sealed class GranitMcpConfigTests
         config.CodeIndexUrl.ShouldContain("{branch}");
         config.FrontIndexUrl.ShouldContain("{branch}");
         config.DataDir.ShouldEndWith(".granit-mcp");
+        config.GitLabToken.ShouldBeNull();
+        config.GitLabHost.ShouldBeNull();
+        config.ReposFile.ShouldEndWith("repos.json");
+    }
+
+    [Fact]
+    public void FromEnvironment_NormalizesGitLabHost()
+    {
+        Environment.SetEnvironmentVariable(
+            "GRANIT_MCP_GITLAB_HOST", "https://gitlab.example.com/");
+
+        try
+        {
+            var config = GranitMcpConfig.FromEnvironment();
+            config.GitLabHost.ShouldBe("gitlab.example.com");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("GRANIT_MCP_GITLAB_HOST", null);
+        }
     }
 
     [Fact]

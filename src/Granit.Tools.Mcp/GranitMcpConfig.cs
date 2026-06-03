@@ -9,7 +9,10 @@ public sealed record GranitMcpConfig(
     string DocsUrl,
     string CodeIndexUrl,
     string FrontIndexUrl,
-    string? GitHubToken)
+    string? GitHubToken,
+    string? GitLabToken,
+    string? GitLabHost,
+    string ReposFile)
 {
     private const string Prefix = "GRANIT_MCP_";
 
@@ -37,11 +40,36 @@ public sealed record GranitMcpConfig(
 
         string? githubToken = Environment.GetEnvironmentVariable(
             $"{Prefix}GITHUB_TOKEN");
+        string? gitlabToken = Environment.GetEnvironmentVariable(
+            $"{Prefix}GITLAB_TOKEN");
+        string? gitlabHost = NormalizeHost(
+            Environment.GetEnvironmentVariable($"{Prefix}GITLAB_HOST"));
+        string reposFile = Environment.GetEnvironmentVariable(
+            $"{Prefix}REPOS_FILE")
+            ?? Path.Combine(dataDir, "repos.json");
 
         return new GranitMcpConfig(
             logLevel, refreshHours, dataDir,
             docsUrl, codeIndexUrl, frontIndexUrl,
-            githubToken);
+            githubToken, gitlabToken, gitlabHost, reposFile);
+    }
+
+    /// <summary>Strips scheme and trailing slash so the host can be slotted into URLs.</summary>
+    private static string? NormalizeHost(string? host)
+    {
+        if (string.IsNullOrWhiteSpace(host))
+        {
+            return null;
+        }
+
+        string trimmed = host.Trim();
+        int scheme = trimmed.IndexOf("://", StringComparison.Ordinal);
+        if (scheme >= 0)
+        {
+            trimmed = trimmed[(scheme + 3)..];
+        }
+
+        return trimmed.TrimEnd('/');
     }
 
     private static T ParseEnum<T>(string key, T defaultValue)
