@@ -17,6 +17,7 @@ builder.Logging.AddConsole(options =>
 builder.Services.AddSingleton(config);
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<DocsStore>();
+builder.Services.AddSingleton<RepoRegistry>();
 builder.Services.AddSingleton<CodeIndexClient>();
 builder.Services.AddSingleton<NuGetClient>();
 builder.Services.AddHostedService<DocsIndexer>();
@@ -32,7 +33,7 @@ builder.Services
         options.ServerInfo = new()
         {
             Name = "granit-tools-mcp",
-            Version = "1.0.0",
+            Version = "1.1.0",
         };
         options.ServerInstructions =
             "Granit framework MCP server. " +

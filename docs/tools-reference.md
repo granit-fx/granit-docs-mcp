@@ -90,13 +90,14 @@ and enums — in both the .NET and TypeScript codebases.
 | Parameter | Type | Required | Default |
 | --------- | ---- | -------- | ------- |
 | `query` | string | yes | — |
-| `repo` | string | no | both |
+| `repo` | string | no | all |
 | `kind` | string | no | all |
 | `limit` | int | no | 10 |
 | `branch` | string | no | detected |
 
 - **query:** Type name, method name, or keywords (min 2 chars per term)
-- **repo:** Restrict to `"dotnet"` or `"front"`
+- **repo:** Restrict to a configured repo id (`"dotnet"`, `"front"`, or a
+  `repos.json` id). Omit to search all.
 - **kind:** Filter by `class`, `interface`, `method`, `enum`, `record`,
   `function`, or `type`
 - **limit:** Maximum results (max 20)
@@ -127,11 +128,12 @@ methods, properties, and events with their signatures.
 | Parameter | Type | Required | Default |
 | --------- | ---- | -------- | ------- |
 | `type` | string | yes | — |
-| `repo` | string | no | both |
+| `repo` | string | no | all |
 | `branch` | string | no | detected |
 
 - **type:** Type name, e.g. `"IBlobStorage"`. Case-insensitive.
-- **repo:** Restrict to `"dotnet"` or `"front"`
+- **repo:** Restrict to a configured repo id (`"dotnet"`, `"front"`, or a
+  `repos.json` id). Omit to search all.
 - **branch:** Git branch for the code index
 
 **Type resolution order:**
@@ -153,7 +155,7 @@ Shows the project/package dependency graph for the Granit framework.
 
 | Parameter | Type | Required | Default | Description |
 | --------- | ---- | -------- | ------- | ----------- |
-| `repo` | string | no | both | Restrict to `"dotnet"` or `"front"` |
+| `repo` | string | no | all | Configured repo id (`dotnet`, `front`, or `repos.json` id) |
 | `branch` | string | no | detected | Git branch for the code index |
 
 **Returns:** Markdown sections for .NET projects (with framework targets
@@ -167,7 +169,7 @@ Lists Git branches that have a committed code index file.
 
 | Parameter | Type | Required | Default | Description |
 | --------- | ---- | -------- | ------- | ----------- |
-| `repo` | string | no | both | Restrict to `"dotnet"` or `"front"` |
+| `repo` | string | no | all | Configured repo id (`dotnet`, `front`, or `repos.json` id) |
 
 **Returns:** Markdown grouped by repo, showing available branches. Use
 these values for the `branch` parameter of other code tools.

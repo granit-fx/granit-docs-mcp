@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Granit.Tools.Mcp.Models;
 using Granit.Tools.Mcp.Services;
 using ModelContextProtocol.Server;
 
@@ -11,10 +10,10 @@ public static class GetProjectGraphTool
     [McpServerTool(Name = "code_get_graph")]
     [Description(
         "Shows the project/package dependency graph for the Granit framework. " +
-        "Lists all .NET projects and/or TypeScript packages.")]
+        "Lists .NET projects and/or TypeScript packages per configured repo.")]
     public static async Task<string> ExecuteAsync(
         CodeIndexClient client,
-        [Description("Restrict to a specific repo. Omit to show both.")]
+        [Description("Restrict to a configured repo id (e.g. \"dotnet\", \"front\", or a repos.json id). Omit to show all.")]
         string? repo = null,
         [Description("Git branch for the code index. Defaults to detected branch or develop.")]
         string? branch = null,
@@ -22,10 +21,9 @@ public static class GetProjectGraphTool
     {
         var sections = new List<string>();
 
-        if (repo is not "front")
+        foreach (LoadedIndex loaded in await client.GetIndexesAsync(repo, branch, ct))
         {
-            CodeIndex? codeIndex = await client.GetCodeIndexAsync(branch, ct);
-            if (codeIndex is { ProjectGraph.Count: > 0 })
+            if (loaded.Dotnet is { ProjectGraph.Count: > 0 } codeIndex)
             {
                 var sorted = codeIndex.ProjectGraph
                     .OrderBy(p => p.Name)
@@ -39,15 +37,10 @@ public static class GetProjectGraphTool
                 });
 
                 sections.Add(
-                    $"### .NET — {sorted.Count} projects\n\n" +
+                    $"### {loaded.Repo.Id} (.NET) — {sorted.Count} projects\n\n" +
                     string.Join('\n', lines));
             }
-        }
-
-        if (repo is not "dotnet")
-        {
-            FrontIndex? frontIndex = await client.GetFrontIndexAsync(branch, ct);
-            if (frontIndex is { Packages.Count: > 0 })
+            else if (loaded.Front is { Packages.Count: > 0 } frontIndex)
             {
                 var sorted = frontIndex.Packages
                     .OrderBy(p => p.Name)
@@ -60,7 +53,7 @@ public static class GetProjectGraphTool
                 });
 
                 sections.Add(
-                    $"### TypeScript — {sorted.Count} packages\n\n" +
+                    $"### {loaded.Repo.Id} (TypeScript) — {sorted.Count} packages\n\n" +
                     string.Join('\n', lines));
             }
         }

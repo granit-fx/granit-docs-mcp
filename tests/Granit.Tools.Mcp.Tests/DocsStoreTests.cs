@@ -58,7 +58,10 @@ public sealed class DocsStoreTests : IDisposable
             "https://granit-fx.dev/llms-full.txt",
             "unused",
             "unused",
-            null);
+            GitHubToken: null,
+            GitLabToken: null,
+            GitLabHost: null,
+            ReposFile: "unused");
 
         _store = new DocsStore(config, NullLogger<DocsStore>.Instance);
         _store.Index(SampleMarkdown);

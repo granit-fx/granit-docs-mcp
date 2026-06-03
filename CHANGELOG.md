@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-06-03
+
+### Added
+
+- Multi-repository code search via a `repos.json` file
+  (`GRANIT_MCP_REPOS_FILE`, default `~/.granit-mcp/repos.json`): make extra
+  repos searchable beyond the built-in `granit-dotnet` / `granit-front`
+- Private GitHub repo support — indexes fetched via the authenticated
+  Contents API using `GRANIT_MCP_GITHUB_TOKEN`
+- Self-hosted GitLab provider support via `GRANIT_MCP_GITLAB_TOKEN` and
+  `GRANIT_MCP_GITLAB_HOST` (per-entry `host` override)
+- The `repo` parameter of the code tools now accepts any configured repo id
+
+### Changed
+
+- Configured repos augment the built-in defaults; reusing an `id` overrides
+  a default. Access is governed by the caller's token — unreachable repos
+  are skipped silently
+- Dependency updates: ModelContextProtocol 1.3.0, Microsoft.Extensions.\*
+  and Microsoft.Data.Sqlite 10.0.8, Markdig 1.2.0, Microsoft.NET.Test.Sdk
+  18.6.0, coverlet.collector 10.0.1
+
 ## [1.0.0] - 2026-03-26
 
 ### Added
