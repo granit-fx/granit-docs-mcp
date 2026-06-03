@@ -89,4 +89,6 @@ Try these in your AI assistant:
 
 - [Tools Reference](tools-reference.md) — complete reference for all nine tools
 - [Configuration](configuration.md) — environment variables, data directory, caching
+- [Private repos](configuration.md#searching-additional-repositories) —
+  add private GitHub / self-hosted GitLab repos via `repos.json`
 - [Architecture](architecture.md) — how the server works under the hood

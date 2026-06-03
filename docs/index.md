@@ -10,7 +10,7 @@ navigation, and NuGet package discovery — via the Model Context Protocol.
 - [Tools Reference](tools-reference.md) — all 9 tools with parameters
   and examples
 - [Configuration](configuration.md) — environment variables, caching,
-  GitHub Packages
+  GitHub Packages, and adding private GitHub / GitLab repos
 - [Architecture](architecture.md) — system design, services, error
   handling
 - [Usage Patterns](usage-patterns.md) — practical workflows and tips

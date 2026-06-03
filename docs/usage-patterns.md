@@ -70,6 +70,17 @@ code_search("MyNewType", branch="feature/new-module")
 → search against a specific branch
 ```
 
+### Search a private or extra repo
+
+```text
+code_search("InvoiceService", repo="business")
+→ search a repo configured in repos.json (private GitHub / GitLab)
+```
+
+Built-in repos (`dotnet`, `front`) are always available. Add more — including
+private GitHub or self-hosted GitLab repos — in `~/.granit-mcp/repos.json`; see
+[Configuration](configuration.md#searching-additional-repositories).
+
 ## NuGet: discovery and inspection
 
 ### List all packages

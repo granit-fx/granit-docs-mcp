@@ -127,6 +127,10 @@ and repos on a self-hosted GitLab — list them in `repos.json` (path from
 ]
 ```
 
+A ready-to-edit template with inline comments lives at
+[`repos.example.json`](../repos.example.json) in the repo root — copy it to
+`~/.granit-mcp/repos.json`. Comments (`//`) and trailing commas are allowed.
+
 ### Entry fields
 
 | Field | Required | Default | Notes |

@@ -29,10 +29,15 @@ reference, configuration, architecture, usage patterns, contributing.
 
 | Tool | Description |
 | ---- | ----------- |
-| `code_search` | Search symbols across .NET and TS |
+| `code_search` | Search symbols across all configured repos (.NET + TS) |
 | `code_get_api` | Public API of a type with signatures |
 | `code_get_graph` | Project/package dependency graph |
 | `code_list_branches` | Branches with committed code indexes |
+
+By default the code tools search two built-in repos (`granit-dotnet`,
+`granit-front`). Add **private GitHub** or **self-hosted GitLab** repos via a
+`repos.json` file — see
+[Configuration › additional repositories](docs/configuration.md#searching-additional-repositories).
 
 ### NuGet packages
 
@@ -59,6 +64,11 @@ dotnet tool install --global Granit.Tools.Mcp
 }
 ```
 
+For **private GitHub** or **self-hosted GitLab** repos, set
+`GRANIT_MCP_GITHUB_TOKEN` / `GRANIT_MCP_GITLAB_TOKEN` (+ `GRANIT_MCP_GITLAB_HOST`)
+in the server `env`, and list the repos in `~/.granit-mcp/repos.json` — see
+[Configuration](docs/configuration.md#searching-additional-repositories).
+
 ## Use with Cursor / Windsurf
 
 Add the MCP server in **Settings > MCP Servers**:
@@ -72,9 +82,10 @@ Add the MCP server in **Settings > MCP Servers**:
 Claude Code ──stdio──> Granit.Tools.Mcp (local .NET 10 tool)
                          |-- Docs ---------> SQLite FTS5
                          |                     ^ llms-full.txt (auto-generated)
-                         |-- Code ---------> .mcp-*-index.json (GitHub raw)
+                         |-- Code ---------> .mcp-*-index.json per repo
+                         |                     ^ via GitHub / GitLab APIs
                          |-- NuGet --------> api.nuget.org
-                         +-- Branches -----> api.github.com
+                         +-- Branches -----> GitHub / GitLab APIs
 ```
 
 ### Data sources
@@ -82,8 +93,7 @@ Claude Code ──stdio──> Granit.Tools.Mcp (local .NET 10 tool)
 | Source | Origin | Cache |
 | ------ | ------ | ----- |
 | Documentation | `granit-fx.dev/llms-full.txt` | SQLite (4h refresh) |
-| .NET code index | GitHub raw (branch-aware) | In-memory (12h) |
-| Front code index | GitHub raw (branch-aware) | In-memory (12h) |
+| Code indexes (per repo) | GitHub raw / Contents API / GitLab v4 (branch-aware) | In-memory (12h) |
 | NuGet packages | NuGet Search API | In-memory (12h) |
 | NuGet package info | NuGet Registration API | In-memory (6h) |
 
