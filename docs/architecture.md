@@ -4,9 +4,9 @@
 
 Granit Tools MCP is a local .NET 10 dotnet tool that speaks the
 [Model Context Protocol](https://modelcontextprotocol.io) over stdio.
-It acts as a bridge between AI assistants and three external data
-sources: the Granit documentation site, GitHub-hosted code indexes,
-and the NuGet registry.
+It acts as a bridge between AI assistants and external data sources:
+the Granit documentation site, per-repo code indexes (GitHub and
+self-hosted GitLab, public or private), and the NuGet registry.
 
 ```text
 AI assistant ──stdio (JSON-RPC)──> granit-tools-mcp
@@ -14,9 +14,8 @@ AI assistant ──stdio (JSON-RPC)──> granit-tools-mcp
                                      │    ↑ DocsIndexer        ↑ indexed from
                                      │    └─ periodic fetch ── granit-fx.dev/llms-full.txt
                                      │
-                                     ├─ CodeIndexClient ───> raw.githubusercontent.com
-                                     │    └─ branch-aware      .mcp-code-index.json
-                                     │                         .mcp-front-index.json
+                                     ├─ CodeIndexClient ───> per-repo .mcp-*-index.json
+                                     │    └─ branch-aware      GitHub / GitLab
                                      │
                                      ├─ NuGetClient ───────> api.nuget.org
                                      │    └─ optional ────────> nuget.pkg.github.com
@@ -86,11 +85,28 @@ refreshes on a configurable interval (`GRANIT_MCP_REFRESH_HOURS`).
 - The host is configured with `BackgroundServiceExceptionBehavior.Ignore`
   so a crash in the indexer never kills the server
 
+### RepoRegistry
+
+Builds the set of searchable repositories: the two built-in defaults
+(`granit-dotnet`, `granit-front`) plus any user-defined repos loaded from
+`repos.json` (`GRANIT_MCP_REPOS_FILE`). User entries augment the defaults
+and may override one by reusing its `id`. Each entry carries a `provider`
+(`github`/`gitlab`), `kind` (`dotnet`/`front`), `project`, and optional
+`host`/`indexPath`/`private`. Invalid entries are skipped with a warning.
+
 ### CodeIndexClient
 
-Fetches `.mcp-code-index.json` (for granit-dotnet) and
-`.mcp-front-index.json` (for granit-front) from GitHub raw URLs. The
-URL contains a `{branch}` placeholder that is replaced at runtime.
+Fetches each configured repo's `.mcp-*-index.json` and parses it per `kind`.
+The fetch endpoint and auth depend on the repo's `provider`:
+
+| Provider | Endpoint | Auth |
+| -------- | -------- | ---- |
+| GitHub (public) | `raw.githubusercontent.com` | none |
+| GitHub (`private`) | Contents API `api.github.com` | `Bearer GRANIT_MCP_GITHUB_TOKEN` |
+| GitLab | API v4 raw `https://{host}/api/v4/...` | `PRIVATE-TOKEN GRANIT_MCP_GITLAB_TOKEN` |
+
+Access is governed by the caller's token — a repo that returns 403/404 is
+skipped silently, so a team can share one `repos.json`.
 
 **Branch resolution:**
 
@@ -98,7 +114,7 @@ URL contains a `{branch}` placeholder that is replaced at runtime.
 2. Otherwise, call `GitBranchDetector.DetectBranch()` to read `.git/HEAD`
 3. If detection fails (not a git repo, detached HEAD), fall back to `develop`
 
-**Caching:** In-memory dictionary keyed by branch name, 12-hour TTL.
+**Caching:** In-memory dictionary keyed by `repo@branch`, 12-hour TTL.
 Returns stale data on network error.
 
 ### NuGetClient
@@ -145,6 +161,7 @@ All services are registered in `Program.cs`:
 GranitMcpConfig   → Singleton (immutable record from env vars)
 HttpClientFactory → Transient (via AddHttpClient)
 DocsStore         → Singleton (owns SQLite connection)
+RepoRegistry      → Singleton (defaults + repos.json)
 CodeIndexClient   → Singleton (owns in-memory cache)
 NuGetClient       → Singleton (owns in-memory cache)
 DocsIndexer       → HostedService (BackgroundService)

@@ -1,0 +1,47 @@
+// Example repos.json for granit-tools-mcp.
+// Copy to ~/.granit-mcp/repos.json (or the path in GRANIT_MCP_REPOS_FILE),
+// then edit. Comments (//) and trailing commas are allowed.
+//
+// Each entry makes one repo searchable by the code tools, on top of the
+// built-in `dotnet` (granit-dotnet) and `front` (granit-front) repos.
+// Reuse an `id` to override a built-in.
+//
+// Fields:
+//   id        Selector for the `repo` tool parameter (default: last path segment)
+//   kind      "dotnet" | "front" — the index schema (required)
+//   provider  "github" (default) | "gitlab"
+//   project   GitHub "owner/name"; GitLab "group/subgroup/project" (required)
+//   host      GitLab host; falls back to GRANIT_MCP_GITLAB_HOST
+//   indexPath Defaults to .mcp-code-index.json / .mcp-front-index.json
+//   private   GitHub only — fetch via the authenticated Contents API
+//
+// Tokens go in the MCP server env (never in this file):
+//   GRANIT_MCP_GITHUB_TOKEN  Bearer token, for private GitHub repos
+//   GRANIT_MCP_GITLAB_TOKEN  PRIVATE-TOKEN, for GitLab repos
+[
+  // Private GitHub repo (Contents API + GRANIT_MCP_GITHUB_TOKEN)
+  {
+    "id": "business",
+    "kind": "dotnet",
+    "provider": "github",
+    "project": "granit-fx/granit-business",
+    "private": true
+  },
+
+  // Self-hosted GitLab repo; host inherited from GRANIT_MCP_GITLAB_HOST
+  {
+    "id": "internal-api",
+    "kind": "dotnet",
+    "provider": "gitlab",
+    "project": "granit/backend/internal-api"
+  },
+
+  // GitLab repo with an explicit host and a front (TypeScript) index
+  {
+    "id": "ops",
+    "kind": "front",
+    "provider": "gitlab",
+    "host": "gitlab.example.com",
+    "project": "infra/ops-console"
+  }
+]
