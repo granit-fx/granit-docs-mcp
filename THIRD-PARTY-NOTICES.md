@@ -2,13 +2,13 @@
 
 This project uses the following third-party packages.
 
-Dernière mise à jour : 2026-06-03
+Dernière mise à jour : 2026-06-08
 
 ## Summary
 
 | Package | Version | License | Copyright |
 | ------- | ------- | ------- | --------- |
-| ModelContextProtocol | 1.3.0 | MIT | Microsoft Corporation |
+| ModelContextProtocol | 1.4.0 | MIT | Microsoft Corporation |
 | Microsoft.Extensions.Hosting | 10.0.8 | MIT | Microsoft Corporation |
 | Microsoft.Extensions.Http | 10.0.8 | MIT | Microsoft Corporation |
 | Microsoft.Data.Sqlite | 10.0.8 | MIT | Microsoft Corporation |
@@ -16,7 +16,7 @@ Dernière mise à jour : 2026-06-03
 
 ## ModelContextProtocol
 
-- **Version:** 1.3.0
+- **Version:** 1.4.0
 - **License:** MIT
 - **Copyright:** Copyright (c) Microsoft Corporation
 - **Source:** <https://github.com/modelcontextprotocol/csharp-sdk>
