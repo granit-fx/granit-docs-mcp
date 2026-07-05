@@ -2,7 +2,7 @@
 
 This project uses the following third-party packages.
 
-Dernière mise à jour : 2026-07-05
+Last updated: 2026-07-05
 
 ## Summary
 
