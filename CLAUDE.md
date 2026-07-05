@@ -1,8 +1,8 @@
 # granit-tools-mcp
 
-Local MCP server for the Granit framework. Distributed as a .NET 10
-dotnet tool. Provides documentation search (SQLite FTS5), code
-navigation, and NuGet package discovery via the Model Context Protocol.
+Local MCP server for the Granit framework, distributed as a .NET 10 dotnet tool.
+Provides documentation search (SQLite FTS5), code navigation, and NuGet package
+discovery via the Model Context Protocol.
 
 ## Stack
 
@@ -65,10 +65,10 @@ Environment variables with `GRANIT_MCP_` prefix:
 
 ### Additional repos (`repos.json`)
 
-Built-in repos `dotnet` (granit-dotnet) and `front` (granit-front) are
-always searchable. Add private GitHub or self-hosted GitLab repos via
-`repos.json` (augments defaults; reuse an `id` to override one). Access is
-governed by the caller's token — unreachable repos are skipped silently.
+Built-in repos `dotnet` (granit-dotnet) and `front` (granit-front) are always
+searchable. Add private GitHub or self-hosted GitLab repos via `repos.json`
+(augments defaults; reuse an `id` to override one). Access is governed by the
+caller's token — unreachable repos are skipped silently.
 
 ```jsonc
 [
