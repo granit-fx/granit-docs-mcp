@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-07-05
+
+### Security
+
+- Override transitive `SQLitePCLRaw.lib.e_sqlite3` 2.1.11 (high-severity
+  GHSA-2m69-gcr7-jv3q) pulled by Microsoft.Data.Sqlite with an explicit
+  `SQLitePCLRaw.bundle_e_sqlite3` 3.0.3 reference
+
+### Changed
+
+- Dependency updates: ModelContextProtocol 1.4.0, Microsoft.Extensions.\*
+  and Microsoft.Data.Sqlite 10.0.9, Markdig 1.3.2, Microsoft.NET.Test.Sdk
+  18.7.0
+
 ## [1.1.0] - 2026-06-03
 
 ### Added
